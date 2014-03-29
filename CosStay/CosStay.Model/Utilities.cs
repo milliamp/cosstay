@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNet.Identity.EntityFramework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,15 +21,12 @@ namespace CosStay.Model
                     Email = "alex@milliamp.org",
                     JoinDate = DateTime.UtcNow
                 };
-                var adminRole = new Role
+                var adminRole = new IdentityRole
                 {
                     Name = "Administrator",
-                    Users = new List<User>() {
-                        admin
-                    }
                 };
                 context.Users.Add(admin);
-                context.Roles.Add(adminRole);
+                
 
                 var seedData = new SeedData
                 {
@@ -39,7 +37,7 @@ namespace CosStay.Model
                 context.SaveChanges();
             }
 
-            if (NeedsUpdate(context, APPLICATION_CATEGORY, new DateTimeOffset(new DateTime(2014, 03, 23, 17, 46, 0))))
+            if (NeedsUpdate(context, APPLICATION_CATEGORY, new DateTimeOffset(new DateTime(2014, 03, 29, 18, 01, 0))))
             {
                 var hamilton = new Location
                 {
@@ -52,14 +50,77 @@ namespace CosStay.Model
                 };
                 context.Locations.Add(hamilton);
 
+                var page1 = new ContentPage
+                {
+                    Uri = "test-page"
+                };
+
+                var ver1 = new ContentPageVersion
+                {
+                    CreatedDate = DateTime.Now,
+                    MarkdownContent = "HALOO1",
+                    Page = page1,
+                    PublishDate = DateTime.Now,
+                    Status = ContentPageVersionStatus.Published,
+                    Title = "TITEL1!",
+                    Version = 1
+                };
+
+                var ver2 = new ContentPageVersion
+                {
+                    CreatedDate = DateTime.Now,
+                    MarkdownContent = "HALOO",
+                    Page = page1,
+                    PublishDate = DateTime.Now.AddDays(2),
+                    Status = ContentPageVersionStatus.Draft,
+                    Title = "TITEL!",
+                    Version = 2
+                };
+
+                context.ContentPages.Add(page1);
+                context.ContentPageVersions.Add(ver1);
+                context.ContentPageVersions.Add(ver2);
+
                 var seedData = new SeedData
                 {
                     Category = APPLICATION_CATEGORY,
-                    Version = new DateTimeOffset(new DateTime(2014, 03, 23, 17, 46, 0))
+                    Version = new DateTimeOffset(new DateTime(2014, 03, 23, 18, 01, 0))
                 };
                 context.SeedData.Add(seedData);
                 context.SaveChanges();
 
+            }
+
+
+            if (NeedsUpdate(context, APPLICATION_CATEGORY, new DateTimeOffset(new DateTime(2014, 03, 29, 18, 30, 0))))
+            {
+
+                var page1 = new ContentPage
+                {
+                    Uri = "404error"
+                };
+
+                var ver1 = new ContentPageVersion
+                {
+                    CreatedDate = DateTime.Now,
+                    MarkdownContent = "ERROR 404 NOT FND",
+                    Page = page1,
+                    PublishDate = DateTime.Now,
+                    Status = ContentPageVersionStatus.Published,
+                    Title = "NT FND!",
+                    Version = 1
+                };
+
+                context.ContentPages.Add(page1);
+                context.ContentPageVersions.Add(ver1);
+
+                var seedData = new SeedData
+                {
+                    Category = APPLICATION_CATEGORY,
+                    Version = new DateTimeOffset(new DateTime(2014, 03, 23, 18, 30, 0))
+                };
+                context.SeedData.Add(seedData);
+                context.SaveChanges();
             }
 
             return true;

@@ -60,7 +60,7 @@
         </td>
         <td>
             @Html.ActionLink("Edit", "Edit", new { id=item.EventInstanceId }) |
-            @Html.ActionLink("Details", "Details", new { id=item.EventInstanceId }) |
+            @Html.ActionLink("Details", "Details", new { id=item.EventInstanceId, name=(ViewContext.Controller as CosStay.Site.Controllers.BaseController).SafeUri(item.Name) }) |
             @Html.ActionLink("Delete", "Delete", new { id=item.EventInstanceId })
         </td>
     </tr>

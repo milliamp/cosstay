@@ -7,21 +7,23 @@ using System.Threading.Tasks;
 
 namespace CosStay.Model
 {
-    public class Event
+    public class NamedEntity
+    {
+        public string Name { get; set; }
+    }
+    public class Event : NamedEntity
     {
         public int EventId { get; set; }
-        public string Name { get; set; }
         public virtual List<EventInstance> Instances { get; set; }
         public string Url { get; set; }
 
         public virtual List<Photo> Photos { get; set; }
     }
 
-    public class EventInstance
+    public class EventInstance : NamedEntity
     {
         public int EventInstanceId { get; set; }
         public virtual Event Event { get; set; }
-        public string Name { get; set; }
         public string Url { get; set; }
         public string FacebookEventId { get; set; }
         public string Description { get; set; }
@@ -34,20 +36,18 @@ namespace CosStay.Model
         public virtual List<Photo> Photos { get; set; }
     }
 
-    public class Location
+    public class Location : NamedEntity
     {
         public int LocationId { get; set; }
-        public string Name { get; set; }
         public LatLng LatLng { get; set; }
         public virtual List<Venue> Venues { get; set; }
 
         public virtual List<Photo> Photos { get; set; }
     }
 
-    public class Venue
+    public class Venue : NamedEntity
     {
         public int VenueId { get; set; }
-        public string Name { get; set; }
         public virtual LatLng? LatLng { get; set; }
         public string Address { get; set; }
         public virtual Location Location { get; set; }
@@ -61,11 +61,10 @@ namespace CosStay.Model
         public float Lng { get; set; }
     }
 
-    public class Country
+    public class Country : NamedEntity
     {
         public int CountryId { get; set; }
         public virtual List<Location> Locations { get; set; }
-        public string Name { get; set; }
         public string ShortName { get; set; }
     }
 
@@ -93,14 +92,6 @@ namespace CosStay.Model
         public string Data { get; set; }
     }
 
-    public class FacebookAccessToken
-    {
-        public int FacebookAccessTokenId { get; set; }
-        public string AccessToken { get; set; }
-        public DateTimeOffset Expiry { get; set; }
-        public DateTimeOffset Obtained { get; set; }
-    }
-
     public class ContactMethod
     {
         public int ContactMethodId { get; set; }
@@ -109,10 +100,9 @@ namespace CosStay.Model
         public int Order { get; set; } 
     }
 
-    public class AccomodationVenue
+    public class AccomodationVenue : NamedEntity
     {
         public int AccomodationVenueId { get; set; }
-        public string Name { get; set; }
         public virtual LatLng? LatLng { get; set; }
         public string Address { get; set; }
         public virtual Location Location { get; set; }
@@ -220,23 +210,20 @@ namespace CosStay.Model
         Other
     }
 
-    public class BedType
+    public class BedType : NamedEntity
     {
         public int BedTypeId { get; set; }
-        public string Name { get; set; }
     }
 
-    public class AccomodationVenueFeature
+    public class AccomodationVenueFeature : NamedEntity
     {
         public int AccomodationVenueFeatureId { get; set; }
-        public string Name { get; set; }
     }
 
 
-    public class AccomodationRoomFeature
+    public class AccomodationRoomFeature : NamedEntity
     {
         public int AccomodationRoomFeatureId { get; set; }
-        public string Name { get; set; }
     }
 
 }

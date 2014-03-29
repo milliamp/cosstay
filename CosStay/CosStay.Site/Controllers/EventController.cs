@@ -16,16 +16,16 @@ using CosStay.Site.Models;
 
 namespace CosStay.Site.Controllers
 {
+    [RoutePrefix("events")]
+    [Route("{action=index}")]
     public class EventController : BaseController
     {
-        //
-        // GET: /Event/
         public ActionResult Index()
         {
 
             using (var db = new CosStayContext())
             {
-                if (db.Events.Count() > 0)
+               /* if (db.Events.Count() > 0)
                 {
                     db.Events.RemoveRange(db.Events);
                     db.EventInstances.RemoveRange(db.EventInstances);
@@ -51,25 +51,20 @@ namespace CosStay.Site.Controllers
                     db.Events.Add(event1);
                     db.EventInstances.Add(instance1);
                     db.SaveChanges();
-                }
+                }*/
                 return View(db.EventInstances.ToArray());    
             }
-            
             
         }
 
         [Authorize]
-        public ActionResult Details(string id)
+        [Route("{id:int}/{name?}")]
+        public ActionResult Details(int id, string name)
         {
-            int eventId = 0;
-            if (!int.TryParse(id, out eventId))
-                throw new InvalidOperationException();
 
             using (var db = new CosStayContext())
             {
-                var instance = db.EventInstances.Find(eventId);
-                if (instance == null)
-                    throw new FileNotFoundException();
+                var instance = ValidateDetails(db.EventInstances, id, name);
 
                 string userRsvp = "";
                 bool userAttending = false;

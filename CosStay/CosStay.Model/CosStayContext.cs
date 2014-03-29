@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace CosStay.Model
 {
-    public class CosStayContext : IdentityDbContext
+    public class CosStayContext : IdentityDbContext<User>
     {
         public CosStayContext()
             : base("DefaultConnection")
@@ -23,9 +23,8 @@ namespace CosStay.Model
         public DbSet<Location> Locations { get; set; }
         public DbSet<Venue> Venues { get; set; }
         public DbSet<Country> Countries { get; set; }
-        public DbSet<User> Users { get; set; }
+        //public DbSet<User> Users { get; set; }
         public DbSet<Audit> Audits { get; set; }
-        public DbSet<FacebookAccessToken> FacebookAccessTokens { get; set; }
         public DbSet<ContactMethod> ContactMethods { get; set; }
         public DbSet<AccomodationVenue> AccomodationVenues { get; set; }
         public DbSet<AccomodationRoom> AccomodationRooms { get; set; }
@@ -41,8 +40,11 @@ namespace CosStay.Model
         public DbSet<AccomodationVenuePermission> AccomodationVenuePermissions { get; set; }
         public DbSet<AdministrationPermission> AdministrationPermissions { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
-        public DbSet<Role> Roles { get; set; }
-        
+        //public DbSet<Role> Roles { get; set; }
+
+        public DbSet<ContentPage> ContentPages { get; set; }
+        public DbSet<ContentPageVersion> ContentPageVersions { get; set; }
+
         public DbSet<SeedData> SeedData { get; set; }
 
     }
