@@ -42,11 +42,7 @@ namespace CosStay.Model
                 var hamilton = new Location
                 {
                     Name = "Hamilton",
-                    LatLng = new LatLng
-                    {
-                        Lat = -37.7802969f,
-                        Lng = 175.2586997f
-                    },
+                    LatLng = new LatLng(-37.7802969f, 175.2586997f)
                 };
                 context.Locations.Add(hamilton);
 
@@ -123,6 +119,36 @@ namespace CosStay.Model
                 context.SaveChanges();
             }
 
+            if (NeedsUpdate(context, APPLICATION_CATEGORY, new DateTimeOffset(new DateTime(2014, 03, 30, 15, 56, 0))))
+            {
+
+                var page1 = new ContentPage
+                {
+                    Uri = "500error"
+                };
+
+                var ver1 = new ContentPageVersion
+                {
+                    CreatedDate = DateTime.Now,
+                    MarkdownContent = "ERROR 500  OMFG",
+                    Page = page1,
+                    PublishDate = DateTime.Now,
+                    Status = ContentPageVersionStatus.Published,
+                    Title = "OMFG!",
+                    Version = 1
+                };
+
+                context.ContentPages.Add(page1);
+                context.ContentPageVersions.Add(ver1);
+
+                var seedData = new SeedData
+                {
+                    Category = APPLICATION_CATEGORY,
+                    Version = new DateTimeOffset(new DateTime(2014, 03, 30, 15, 56, 0))
+                };
+                context.SeedData.Add(seedData);
+                context.SaveChanges();
+            }
             return true;
         }
 

@@ -2,33 +2,40 @@
 
 @if (Model.Count > 0)
 {
-    <h4>Registered Logins</h4>
-    <table class="table">
-        <tbody>
-            @foreach (var account in Model)
+    <h4>My Logins</h4>
+    <div class="account-list">
+        @foreach (var account in Model)
+        {
+            if (ViewBag.ShowRemoveButton)
             {
-                <tr>
-                    <td>@account.LoginProvider</td>
-                    <td>
-                        @if (ViewBag.ShowRemoveButton)
-                        {
-                            using (Html.BeginForm("Disassociate", "Account"))
-                            {
-                            @Html.AntiForgeryToken()
-                            <div>
-                                @Html.Hidden("loginProvider", account.LoginProvider)
-                                @Html.Hidden("providerKey", account.ProviderKey)
-                                <input type="submit" class="btn btn-default" value="Remove" title="Remove this @account.LoginProvider login from your account" />
-                            </div>
-                            }
-                        }
-                        else
-                        {
-                            @: &nbsp;
-                        }
-                    </td>
-                </tr>
+                <div class="account-panel">
+                <div class="btn btn-default btn-large dropdown-toggle" data-toggle="dropdown">
+                    
+                    @account.LoginProvider
+                    <span class="caret"></span>
+                </div>
+                @using (Html.BeginForm("Disassociate", "Account"))
+                {
+                    @Html.AntiForgeryToken()
+                    <ul class="dropdown-menu">
+                        <li>
+                            @Html.Hidden("loginProvider", account.LoginProvider)
+                            @Html.Hidden("providerKey", account.ProviderKey)
+                            <input type="submit" class="btn btn-default" value="Remove" title="Remove this @account.LoginProvider login from your account" />
+                        </li>
+                    </ul>
+                }
+            </div>
+                
             }
-        </tbody>
-    </table>
+            else
+            {
+                <div class="account-panel">
+                <div class="btn btn-default btn-large">
+                    @account.LoginProvider
+                </div>
+            </div>
+            }
+        }
+    </div>
 }

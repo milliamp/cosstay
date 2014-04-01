@@ -1,57 +1,86 @@
 ﻿@model CosStay.Model.AccomodationVenue
-
+@using GravatarHelper.Extensions
 @{
     ViewBag.Title = "Details";
 }
 
-<h2>Details</h2>
+@if (Model.LatLng != null) { 
+@section scripts
+{
+    <script type="text/javascript"
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB21AFsFMbmFCkYKe7ZrBN46p7Rop-twLY&sensor=false">
+</script>
+<script type="text/javascript">
+    function initialize() {
+        var mapOptions = {
+            center: new google.maps.LatLng(@Model.LatLng.Lat , @Model.LatLng.Lng),
+            zoom: 16
+        };
 
-<div>
-    <h4>AccomodationVenue</h4>
+        var map = new google.maps.Map(document.getElementById("map-canvas"),
+            mapOptions);
+
+        var accomodationMarker = new google.maps.Marker({
+            position: new google.maps.LatLng(@Model.LatLng.Lat , @Model.LatLng.Lng),
+            map: map,
+            title:"@Model.Name.Replace("\"", "\\\"")"
+        })
+    }
+    google.maps.event.addDomListener(window, 'load', initialize);
+</script>
+}
+}
+
+<h2>@Html.DisplayFor(model => model.Name)</h2>
+
+    <address>@Html.DisplayFor(model => model.Address)</address>
+    @if (Model.Owner != null)
+{
+    <div class="owner panel panel-primary">
+        <div class="panel-heading">
+            Owner
+         </div>
+        <div class="panel-body">
+            <div style="float:left;">@Html.Gravatar(Model.Owner.Email, 80)</div>
+            <div>
+                @Model.Owner.Name <br />@Model.Owner.JoinDate.ToLocalTime()
+            </div>
+        </div>
+    </div>
+}
+
 	<hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
+    <div class="row">
 
-        <dd>
-            @Html.DisplayFor(model => model.Name)
-        </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Address)
-        </dt>
+        <dl class="dl-horizontal col-md-6">
+            <dt>
+                @Html.DisplayNameFor(model => model.DateAdded)
+            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Address)
-        </dd>
+            <dd>
+                @Html.DisplayFor(model => model.DateAdded)
+            </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.DateAdded)
-        </dt>
+            <dt>
+                @Html.DisplayNameFor(model => model.AllowsBedSharing)
+            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.DateAdded)
-        </dd>
+            <dd>
+                @Html.DisplayFor(model => model.AllowsBedSharing)
+            </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.AllowsBedSharing)
-        </dt>
+            <dt>
+                @Html.DisplayNameFor(model => model.AllowsMixedRooms)
+            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.AllowsBedSharing)
-        </dd>
+            <dd>
+                @Html.DisplayFor(model => model.AllowsMixedRooms)
+            </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.AllowsMixedRooms)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.AllowsMixedRooms)
-        </dd>
-
-    </dl>
-</div>
+        </dl>
+        <div id="map-canvas" style="height: 400px;" class="col-md-6"></div>
+    </div>
 <p>
     @Html.ActionLink("Edit", "Edit", new { id = Model.AccomodationVenueId }) |
     @Html.ActionLink("Back to List", "Index")

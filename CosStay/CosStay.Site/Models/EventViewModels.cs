@@ -16,7 +16,7 @@ namespace CosStay.Site.Models
         public string Description { get; set; }
 
         public string VenueName { get; set; }
-        public LatLng? VenueLatLng { get; set; }
+        public LatLng VenueLatLng { get; set; }
         public string Address { get; set; }
         public string Location { get; set; }
 

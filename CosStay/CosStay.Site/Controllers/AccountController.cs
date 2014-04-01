@@ -12,11 +12,12 @@ using System.Threading;
 using System.Diagnostics;
 using CosStay.Model;
 using CosStay.Site.Models;
+using CosStay.Site.Controllers;
 
 namespace CosPlay.Site.Controllers
 {
     [Authorize]
-    public class AccountController : Controller
+    public class AccountController : BaseController
     {
         public AccountController()
             : this(new UserManager<User>(new UserStore<User>(new CosStayContext())))
@@ -322,6 +323,8 @@ namespace CosPlay.Site.Controllers
                         UserStore<User> userstore = new UserStore<User>(db);
                         var user = await userstore.FindByIdAsync(User.Identity.GetUserId());
                         user.Email = model.Email;
+                        user.PhoneNumber = model.Phone;
+                        user.Name = model.Name;
                         await userstore.UpdateAsync(user);
                         await db.SaveChangesAsync();
                         return RedirectToAction("Manage", new { Message = "Your properties have been updated." });
@@ -360,7 +363,12 @@ namespace CosPlay.Site.Controllers
                         UserStore<User> userstore = new UserStore<User>(db);
                         var user = await userstore.FindByIdAsync(User.Identity.GetUserId());
 
+                        AddPropertiesFromClaims(user);
+                        var save = db.SaveChangesAsync();
                         uservm.Email = user.Email;
+                        uservm.Name = user.Name;
+                        uservm.Phone = user.PhoneNumber;
+                        await save;
                     }
                     catch (Exception ex)
                     {
@@ -370,6 +378,22 @@ namespace CosPlay.Site.Controllers
                 }
                 return (ActionResult)PartialView("_UserPropertiesListPartial", uservm);
             }).Result;
+        }
+
+        private void AddPropertiesFromClaims(User user)
+        {
+            if (string.IsNullOrWhiteSpace(user.Name))
+            {
+                var nameClaim = user.Claims.FirstOrDefault(c => c.ClaimType == "urn:facebook:name");
+                if (nameClaim != null)
+                    user.Name = nameClaim.ClaimValue;
+            }
+            if (string.IsNullOrWhiteSpace(user.Email))
+            {
+                var emailClaim = user.Claims.FirstOrDefault(c => c.ClaimType == "urn:facebook:email");
+                if (emailClaim != null)
+                    user.Email = emailClaim.ClaimValue;
+            }
         }
 
         protected override void Dispose(bool disposing)

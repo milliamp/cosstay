@@ -63,13 +63,13 @@
     <Compile Include="CosStayDataIntegrityModel.cs" />
     <Compile Include="CosStayModel.cs" />
     <Compile Include="CosStaySecurityModel.cs" />
-    <Compile Include="Migrations\201403290300114_UsersChange.cs" />
-    <Compile Include="Migrations\201403290300114_UsersChange.Designer.cs">
-      <DependentUpon>201403290300114_UsersChange.cs</DependentUpon>
+    <Compile Include="Migrations\201403300318233_Initial.cs" />
+    <Compile Include="Migrations\201403300318233_Initial.Designer.cs">
+      <DependentUpon>201403300318233_Initial.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201403291300573_VenuesAdd.cs" />
-    <Compile Include="Migrations\201403291300573_VenuesAdd.Designer.cs">
-      <DependentUpon>201403291300573_VenuesAdd.cs</DependentUpon>
+    <Compile Include="Migrations\201403300439482_DoubleLatLng.cs" />
+    <Compile Include="Migrations\201403300439482_DoubleLatLng.Designer.cs">
+      <DependentUpon>201403300439482_DoubleLatLng.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -83,11 +83,11 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201403290300114_UsersChange.resx">
-      <DependentUpon>201403290300114_UsersChange.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201403300318233_Initial.resx">
+      <DependentUpon>201403300318233_Initial.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201403291300573_VenuesAdd.resx">
-      <DependentUpon>201403291300573_VenuesAdd.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201403300439482_DoubleLatLng.resx">
+      <DependentUpon>201403300439482_DoubleLatLng.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

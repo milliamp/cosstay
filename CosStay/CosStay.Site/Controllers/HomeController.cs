@@ -14,21 +14,6 @@ namespace CosStay.Site.Controllers
             using (var db = new CosStayContext())
             {
                 CosStay.Model.Utilities.SeedData(db);
-                // Create and save a new Blog 
-
-
-                // Display all Blogs from the database 
-                var query = from b in db.Locations
-                            orderby b.Name
-                            select b;
-                
-                //("All locations in the database:");
-                foreach (var item in query)
-                {
-                    Response.Write(item.Name);
-                }
-                
-
             } 
 
             return View();

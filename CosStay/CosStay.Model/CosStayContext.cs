@@ -18,6 +18,7 @@ namespace CosStay.Model
             Database.SetInitializer(new MigrateDatabaseToLatestVersion<CosStayContext, Configuration>()); 
             //Database.SetInitializer(new DropCreateDatabaseAlways<CosStayContext>());
         }
+
         public DbSet<Event> Events { get; set; }
         public DbSet<EventInstance> EventInstances { get; set; }
         public DbSet<Location> Locations { get; set; }

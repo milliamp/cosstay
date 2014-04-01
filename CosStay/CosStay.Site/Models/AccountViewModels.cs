@@ -13,14 +13,9 @@ namespace CosStay.Site.Models
     {
 
         [Required]
-        [Display(Name = "First name")]
-        [RegularExpression(@"^[a-zA-Z\s]*$", ErrorMessage = "First name must be alpha characters only.")]
-        public string FirstName { get; set; }
-
-        [Required]
-        [Display(Name = "Last name")]
-        [RegularExpression(@"^[a-zA-Z0-9\s]*$", ErrorMessage = "Last name must be alpha characters only.")]
-        public string LastName { get; set; }
+        [Display(Name = "Name")]
+        [RegularExpression(@"^[a-zA-Z\s]*$", ErrorMessage = "Name must be alpha characters only.")]
+        public string Name { get; set; }
 
         [EmailAddress]
         [Display(Name = "Email Address")]

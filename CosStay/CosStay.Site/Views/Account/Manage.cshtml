@@ -8,7 +8,32 @@
 
 <p class="text-success">@ViewBag.StatusMessage</p>
 <div class="row">
-    <div class="col-md-12">
+
+    <div class="col-md-6">
+        @*@using (Html.BeginForm("UpdateDetails", "Account", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+        {
+        @Html.AntiForgeryToken()    
+        @Html.ValidationSummary()
+        <div class="form-group">
+            @Html.LabelFor(m => m.NewPassword, new { @class = "col-md-2 control-label" })
+            <div class="col-md-10">
+                @Html.PasswordFor(m => m.NewPassword, new { @class = "form-control" })
+            </div>
+        </div>
+        }*@
+        <p>&nbsp;</p>
+        @Html.Action("UserPropertiesList")
+        <section id="externalProperties">
+            <br />
+            @*Html.Action("ExternalUserPropertiesList")*@
+        </section>
+
+    </div>
+    <div class="col-md-6">
+        <section id="externalLogins">
+            @Html.Action("RemoveAccountList")
+            @Html.Partial("_ExternalLoginsListPartial", new { Action = "LinkLogin", ReturnUrl = ViewBag.ReturnUrl })
+        </section>
         @if (ViewBag.HasLocalPassword)
         {
             @Html.Partial("_ChangePasswordPartial")
@@ -17,11 +42,6 @@
         {
             @Html.Partial("_SetPasswordPartial")
         }
-
-        <section id="externalLogins">
-            @Html.Action("RemoveAccountList")
-            @Html.Partial("_ExternalLoginsListPartial", new { Action = "LinkLogin", ReturnUrl = ViewBag.ReturnUrl })
-        </section>
     </div>
 </div>
 @section Scripts {

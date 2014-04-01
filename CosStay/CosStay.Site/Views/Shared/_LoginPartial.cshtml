@@ -6,10 +6,27 @@
     @Html.AntiForgeryToken()
 
     <ul class="nav navbar-nav navbar-right">
-        <li>
-            @Html.ActionLink("Hello " + User.Identity.GetUserName() + "!", "Manage", "Account", routeValues: null, htmlAttributes: new { title = "Manage" })
+        <li class="dropdown">
+            @{var c = ViewContext.Controller as CosStay.Site.Controllers.BaseController;}
+            @{var u = c != null ? c.CurrentUser : null;}
+            @{var n = u != null && !string.IsNullOrWhiteSpace(u.Name) ? u.Name : User.Identity.Name;}
+            
+
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                @if (u != null) { 
+                    @Html.Gravatar(u.Email,20)
+                }
+                @n <b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu">
+                <li>@Html.ActionLink("Manage", "Manage", "Account", routeValues: null, htmlAttributes: new { title = "Manage" })</li>
+
+                <li class="divider"></li>
+                <li><a href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>
+            </ul>
         </li>
-        <li><a href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>
+
+        <li></li>
     </ul>
     }
 }

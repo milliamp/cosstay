@@ -7,18 +7,18 @@ namespace CosStay.Model.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.1.0-30225")]
-    public sealed partial class UsersChange : IMigrationMetadata
+    public sealed partial class DoubleLatLng : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(UsersChange));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(DoubleLatLng));
         
         string IMigrationMetadata.Id
         {
-            get { return "201403290300114_UsersChange"; }
+            get { return "201403300439482_DoubleLatLng"; }
         }
         
         string IMigrationMetadata.Source
         {
-            get { return null; }
+            get { return Resources.GetString("Source"); }
         }
         
         string IMigrationMetadata.Target

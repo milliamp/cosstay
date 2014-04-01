@@ -15,6 +15,33 @@ namespace CosStay.Site.Controllers
         // GET: /Page/
         public ActionResult Content(string permalink, int? version)
         {
+            return View(GetContent(permalink, version));
+        }
+
+        public ActionResult ErrorContent(int statusCode, Exception error, bool isAjaxRequest)
+        {
+            Response.StatusCode = statusCode;
+            switch (statusCode)
+            {
+                case 404:
+                    return View("Content", GetContent("404error", null));
+                case 500:
+                    var exceptionDetail = error.Message + "<hr/>";
+                    var insideError = error;
+                    while (insideError != null)
+                    {
+                        exceptionDetail += insideError.StackTrace + "<br/><br/>";
+                        insideError = insideError.InnerException;
+                    }
+                    exceptionDetail += error.TargetSite;
+                    return View("Content", GetContent("500error", null, exceptionDetail));
+                default:
+                    return View("Content", GetContent("500error", null));
+            }
+        }
+
+        public ContentPageViewModel GetContent(string permalink, int? version, string extraText = "")
+        {
             using (var db = new CosStayContext())
             {
                 var page = db.ContentPages.First(p => p.Uri == permalink);
@@ -44,7 +71,7 @@ namespace CosStay.Site.Controllers
                 var vm = new ContentPageViewModel()
                 {
                     CreatedDate = theVersion.CreatedDate,
-                    HtmlContent = md.Transform(theVersion.MarkdownContent),
+                    HtmlContent = md.Transform(theVersion.MarkdownContent) + extraText,
                     MarkdownContent = theVersion.MarkdownContent,
                     PublishDate = theVersion.PublishDate,
                     Status = theVersion.Status,
@@ -53,23 +80,9 @@ namespace CosStay.Site.Controllers
 
                 };
 
-                return View("Content", vm);
+                return vm;
             }
-        }
 
-        public ActionResult ErrorContent(int statusCode, Exception error, bool isAjaxRequest)
-        {
-            Response.StatusCode = statusCode;
-            switch (statusCode)
-            {
-                case 404:
-                    return Content("404error", null);
-                case 500:
-                    return Content("500error", null);
-                default:
-                    return Content("500error", null);
-            }
         }
-
 	}
 }

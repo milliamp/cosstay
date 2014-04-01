@@ -42,7 +42,7 @@ namespace CosStay.Site
             }
         }
 
-        protected void Application_Error(object sender, EventArgs e)
+        /*protected void Application_Error(object sender, EventArgs e)
         {
             Exception lastError = Server.GetLastError();
             Server.ClearError();
@@ -75,7 +75,7 @@ namespace CosStay.Site
 
             controller.Execute(requestContext);
             Response.End();
-        }
+        }*/
 
 
     }

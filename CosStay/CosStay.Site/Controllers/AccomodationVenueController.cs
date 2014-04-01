@@ -7,6 +7,7 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using CosStay.Model;
+using System.Threading.Tasks;
 
 namespace CosStay.Site.Controllers
 {
@@ -27,7 +28,6 @@ namespace CosStay.Site.Controllers
         public ActionResult Details(int id, string name)
         {
             var instance = ValidateDetails(db.AccomodationVenues, id, name);
-
             return View(instance);
         }
 
@@ -48,7 +48,11 @@ namespace CosStay.Site.Controllers
         {
             if (ModelState.IsValid)
             {
+                var currentUser = CurrentUser;
+                accomodationvenue.LatLng = new LatLng();
                 db.AccomodationVenues.Add(accomodationvenue);
+                accomodationvenue.Owner = new User { Id = currentUser.Id };
+                db.Users.Attach(accomodationvenue.Owner);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
@@ -78,7 +82,7 @@ namespace CosStay.Site.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("edit/{id:int}")]
-        public ActionResult Edit([Bind(Include="AccomodationVenueId,Name,Address,DateAdded,AllowsBedSharing,AllowsMixedRooms")] AccomodationVenue accomodationvenue)
+        public ActionResult Edit([Bind(Include="Name,Address,AllowsBedSharing,AllowsMixedRooms")] AccomodationVenue accomodationvenue)
         {
             if (ModelState.IsValid)
             {

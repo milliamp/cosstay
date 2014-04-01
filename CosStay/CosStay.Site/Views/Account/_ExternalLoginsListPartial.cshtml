@@ -1,6 +1,6 @@
 ﻿@using Microsoft.Owin.Security
 
-<h4>Use another service to log in.</h4>
+<h4>Add another login</h4>
 <hr />
 @{
     var loginProviders = Context.GetOwinContext().Authentication.GetExternalAuthenticationTypes();
@@ -13,8 +13,8 @@
     }
     else
     {
-        string action = Model.Action;
-        string returnUrl = Model.ReturnUrl;
+        string action = "LinkLogin";//Model.Action;
+        string returnUrl = "";// Model.ReturnUrl;
         using (Html.BeginForm(action, "Account", new { ReturnUrl = returnUrl }))
         {
             @Html.AntiForgeryToken()

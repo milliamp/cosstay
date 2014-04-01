@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNet.Identity.EntityFramework;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,10 +13,12 @@ namespace CosStay.Model
     {
         public string Name { get; set; }
     }
+
     public class Event : NamedEntity
     {
         public int EventId { get; set; }
         public virtual List<EventInstance> Instances { get; set; }
+        [Display(Name="URL")]
         public string Url { get; set; }
 
         public virtual List<Photo> Photos { get; set; }
@@ -24,13 +28,17 @@ namespace CosStay.Model
     {
         public int EventInstanceId { get; set; }
         public virtual Event Event { get; set; }
+        [Display(Name = "URL")]
         public string Url { get; set; }
         public string FacebookEventId { get; set; }
         public string Description { get; set; }
         public virtual Venue Venue { get; set; }
+        [Display(Name = "Start Date", ShortName="Start")]
         public DateTime StartDate { get; set; }
+        [Display(Name = "End Date", ShortName = "End")]
         public DateTime EndDate { get; set; }
-        
+
+        [Display(Name = "Date Updated", ShortName = "Updated")]
         public DateTimeOffset DateUpdated { get; set; }
 
         public virtual List<Photo> Photos { get; set; }
@@ -39,7 +47,7 @@ namespace CosStay.Model
     public class Location : NamedEntity
     {
         public int LocationId { get; set; }
-        public LatLng LatLng { get; set; }
+        public virtual LatLng LatLng { get; set; }
         public virtual List<Venue> Venues { get; set; }
 
         public virtual List<Photo> Photos { get; set; }
@@ -48,17 +56,26 @@ namespace CosStay.Model
     public class Venue : NamedEntity
     {
         public int VenueId { get; set; }
-        public virtual LatLng? LatLng { get; set; }
+        public virtual LatLng LatLng { get; set; }
         public string Address { get; set; }
         public virtual Location Location { get; set; }
 
         public virtual List<Photo> Photos { get; set; }
     }
 
-    public struct LatLng
+    [ComplexType]
+    public class LatLng
     {
-        public float Lat { get; set; }
-        public float Lng { get; set; }
+        public LatLng()
+        {
+        }
+        public LatLng(double lat, double lng)
+        {
+            Lat = lat;
+            Lng = lng;
+        }
+        public double? Lat { get; private set; }
+        public double? Lng { get; private set; }
     }
 
     public class Country : NamedEntity
@@ -73,8 +90,12 @@ namespace CosStay.Model
         public string Name { get; set; }
         public virtual Location Location { get; set; }
 
+        [Display(Name = "Joined")]
         public DateTimeOffset JoinDate { get; set; }
+
+        [Display(Name = "Last Seen", ShortName = "Seen")]
         public DateTimeOffset LastSeen { get; set; }
+        [Display(Name = "Last Updated", ShortName = "Updated")]
         public DateTimeOffset DetailsUpdatedDate { get; set; }
 
         //public virtual List<Role> Roles { get; set; }
@@ -96,6 +117,7 @@ namespace CosStay.Model
     {
         public int ContactMethodId { get; set; }
         public string Value { get; set; }
+        [Display(Name = "Date Added", ShortName = "Added")]
         public DateTimeOffset DateAdded { get; set; }
         public int Order { get; set; } 
     }
@@ -103,16 +125,18 @@ namespace CosStay.Model
     public class AccomodationVenue : NamedEntity
     {
         public int AccomodationVenueId { get; set; }
-        public virtual LatLng? LatLng { get; set; }
+        public virtual LatLng LatLng { get; set; }
         public string Address { get; set; }
         public virtual Location Location { get; set; }
 
         public virtual User Owner { get; set; }
-
+        [Display(Name = "Date Added", ShortName = "Added")]
         public DateTimeOffset DateAdded { get; set; }
 
         public virtual List<AccomodationVenueFeature> Features { get; set; }
+        [Display(Name = "Allows Bed Sharing")]
         public bool AllowsBedSharing { get; set; }
+        [Display(Name = "Allows Mixed Rooms", ShortName = "Mixed Rooms")]
         public bool AllowsMixedRooms { get; set; }
 
         public virtual List<Photo> Photos { get; set; }
@@ -126,6 +150,8 @@ namespace CosStay.Model
         public virtual List<Bed> Beds { get; set; }
 
         public virtual List<AccomodationRoomFeature> Features { get; set; }
+
+        [Display(Name = "Date Added", ShortName = "Added")]
         public DateTimeOffset DateAdded { get; set; }
 
         public virtual List<Photo> Photos { get; set; }
@@ -147,6 +173,8 @@ namespace CosStay.Model
         public int AccomodationBedAvailabilityNightId { get; set; }
         public virtual Bed Bed { get; set; }
         public DateTimeOffset Night { get; set; }
+
+        [Display(Name = "Status")]
         public BedStatus BedStatus { get; set; }
     }
 
@@ -176,6 +204,7 @@ namespace CosStay.Model
         public virtual User User { get; set; }
         public virtual EventInstance EventInstance { get; set; }
         public bool AutomaticallyAdded { get; set; }
+        [Display(Name = "Date Added", ShortName = "Added")]
         public DateTimeOffset DateAdded { get; set; }
     }
 
@@ -185,6 +214,7 @@ namespace CosStay.Model
         public string Caption { get; set; }
         public virtual User Owner { get; set; }
 
+        [Display(Name = "Date Added", ShortName = "Added")]
         public DateTimeOffset DateAdded { get; set; }
     }
 
@@ -194,6 +224,7 @@ namespace CosStay.Model
         public virtual BedSize Size { get; set; }
         public virtual BedType Type { get; set; }
 
+        [Display(Name = "Date Added", ShortName = "Added")]
         public DateTimeOffset DateAdded { get; set; }
 
         public virtual List<Photo> Photos { get; set; }
