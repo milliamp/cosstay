@@ -1,4 +1,5 @@
-﻿@using Microsoft.Owin.Security
+﻿@model CosStay.Site.Utilities.LoginActionParameters
+@using Microsoft.Owin.Security
 
 <h4>Add another login</h4>
 <hr />
@@ -13,8 +14,8 @@
     }
     else
     {
-        string action = "LinkLogin";//Model.Action;
-        string returnUrl = "";// Model.ReturnUrl;
+        string action = Model.Action;
+        string returnUrl = Model.ReturnUrl;
         using (Html.BeginForm(action, "Account", new { ReturnUrl = returnUrl }))
         {
             @Html.AntiForgeryToken()

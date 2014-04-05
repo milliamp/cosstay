@@ -86,39 +86,14 @@ namespace CosStay.Site.Controllers
                 .ToLowerInvariant();
         }
 
-        public string FacebookAccessToken
-        {
+        public int? FacebookUserId { 
             get
             {
-                var c = Identity.FindFirst("FacebookAccessToken");
-                if (c != null)
-                    return c.Value;
-                return null;
+                var claim = Identity.Claims.FirstOrDefault(c => c.Type == "urn:facebook:id");
+                if (claim == null)
+                    return null;
+                return int.Parse(claim.Value);
             }
         }
-
-        public FacebookClient FacebookClient
-        {
-            get
-            {
-                var fb = new FacebookClient(FacebookAccessToken);
-                fb.AppId = ConfigurationManager.AppSettings["FacebookAppId"];
-                fb.AppSecret = ConfigurationManager.AppSettings["FacebookAppSecret"];
-                return fb;
-            }
-        }
-
-        public int? FacebookUserId
-        {
-            get
-            {
-
-                var c = Identity.FindFirst(string.Format("urn:facebook:{0}", "id"));
-                if (c != null)
-                    return int.Parse(c.Value);
-                return null;
-            }
-        }
-
     }
 }

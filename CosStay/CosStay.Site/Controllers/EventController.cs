@@ -13,6 +13,7 @@ using System.Web.Mvc;
 using Microsoft.Owin.Security;
 using System.IO;
 using CosStay.Site.Models;
+using CosStay.Core.Services;
 
 namespace CosStay.Site.Controllers
 {
@@ -20,6 +21,30 @@ namespace CosStay.Site.Controllers
     [Route("{action=index}")]
     public class EventController : BaseController
     {
+        public EventController(IAppFacebookService appFacebookService, IUserFacebookService userFacebookService)
+        {
+            _appFacebookService = appFacebookService;
+            _userFacebookService = userFacebookService;
+        }
+
+        private IAppFacebookService _appFacebookService;
+        public FacebookClient AppFacebookClient
+        {
+            get
+            {
+                return _appFacebookService.Client;
+            }
+        }
+
+        public IUserFacebookService _userFacebookService { get; set; }
+        public FacebookClient UserFacebookClient
+        {
+            get
+            {
+                return _userFacebookService.Client;
+            }
+        }
+
         public ActionResult Index()
         {
 
@@ -52,7 +77,6 @@ namespace CosStay.Site.Controllers
 
         }
 
-        [Authorize]
         [Route("{id:int}/{name?}")]
         public ActionResult Details(int id, string name)
         {
@@ -65,7 +89,7 @@ namespace CosStay.Site.Controllers
 
                 try
                 {
-                    var fb = FacebookClient;
+                    var fb = AppFacebookClient;
                     if (fb != null)
                     {
                         dynamic eventDetails = fb.Get(instance.FacebookEventId);
@@ -83,13 +107,18 @@ namespace CosStay.Site.Controllers
                                 db.SaveChanges();
                             }
                         }
-                        var userId = FacebookUserId;
-                        if (userId.HasValue)
+
+                        fb = UserFacebookClient;
+                        if (fb != null)
                         {
-                            dynamic attendingResult = fb.Get(string.Format("{0}/invited?user={1}", instance.FacebookEventId, userId));
-                            dynamic attending = attendingResult.data[0];
-                            userAttending = attending.rsvp_status == "attending" || attending.rsvp_status == "maybe";
-                            userRsvp = attending.rsvp_status;
+                            var userId = FacebookUserId;
+                            if (userId.HasValue)
+                            {
+                                dynamic attendingResult = fb.Get(string.Format("{0}/invited?user={1}", instance.FacebookEventId, userId));
+                                dynamic attending = attendingResult.data[0];
+                                userAttending = attending.rsvp_status == "attending" || attending.rsvp_status == "maybe";
+                                userRsvp = attending.rsvp_status;
+                            }
                         }
                     }
                 }
@@ -123,7 +152,7 @@ namespace CosStay.Site.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [Route("create/")]
         public ActionResult Create()
         {
@@ -133,6 +162,7 @@ namespace CosStay.Site.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("create/")]
+        [Authorize(Roles = "Admin")]
         public ActionResult Create([Bind(Include="Description,EndDate,FacebookEventId,Name,StartDate")] EventInstanceViewModel vm)
         {
                 if (ModelState.IsValid)
@@ -148,7 +178,7 @@ namespace CosStay.Site.Controllers
                         {
                             try
                             {
-                                var fb = FacebookClient;
+                                var fb = AppFacebookClient;
                                 dynamic eventDetails = fb.Get(vm.FacebookEventId);
 
                                 instance.FacebookEventId = vm.FacebookEventId;
@@ -169,7 +199,7 @@ namespace CosStay.Site.Controllers
                 return View(vm);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [Route("edit/{id:int}")]
         public ActionResult Edit(int id)
         {
@@ -194,7 +224,7 @@ namespace CosStay.Site.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [Route("edit/{id:int}")]
         public ActionResult Edit(int id, EventInstanceViewModel vm)
@@ -213,7 +243,7 @@ namespace CosStay.Site.Controllers
                     {
                         try
                         {
-                            var fb = FacebookClient;
+                            var fb = AppFacebookClient;
                             dynamic eventDetails = fb.Get(vm.FacebookEventId);
 
                             instance.FacebookEventId = vm.FacebookEventId;
