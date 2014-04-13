@@ -1,4 +1,4 @@
-﻿using CosStay.Model.Migrations;
+﻿//using CosStay.Model.Migrations;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System;
 using System.Collections.Generic;
@@ -15,7 +15,7 @@ namespace CosStay.Model
             : base("DefaultConnection")
         {
 
-            Database.SetInitializer(new MigrateDatabaseToLatestVersion<CosStayContext, Configuration>()); 
+            //Database.SetInitializer(new MigrateDatabaseToLatestVersion<CosStayContext, Configuration>()); 
             //Database.SetInitializer(new DropCreateDatabaseAlways<CosStayContext>());
         }
 
@@ -35,6 +35,7 @@ namespace CosStay.Model
         public DbSet<Photo> Photos { get; set; }
         public DbSet<Bed> Beds { get; set; }
         public DbSet<BedType> BedTypes { get; set; }
+        public DbSet<BedSize> BedSizes { get; set; }
         public DbSet<AccomodationVenueFeature> AccomodationVenueFeatures { get; set; }
         public DbSet<AccomodationRoomFeature> AccomodationRoomFeatures { get; set; }
 

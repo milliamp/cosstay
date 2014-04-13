@@ -1,8 +1,4 @@
-﻿using CosStay.Model;
-using CosStay.Site.Controllers;
-using System;
-using System.Collections.Generic;
-using System.Data.Entity;
+﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -20,6 +16,8 @@ namespace CosStay.Site
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+            AutoMapperConfig.RegisterMaps();
+
         }
 
         protected void Application_BeginRequest(object sender, EventArgs e)

@@ -21,11 +21,14 @@ namespace CosStay.Site.Controllers
     [Route("{action=index}")]
     public class EventController : BaseController
     {
-        public EventController(IAppFacebookService appFacebookService, IUserFacebookService userFacebookService)
+        public EventController(IAppFacebookService appFacebookService, IUserFacebookService userFacebookService, IEntityStore entityStore)
         {
+            _es = entityStore;
             _appFacebookService = appFacebookService;
             _userFacebookService = userFacebookService;
         }
+
+        private IEntityStore _es;
 
         private IAppFacebookService _appFacebookService;
         public FacebookClient AppFacebookClient
@@ -80,9 +83,7 @@ namespace CosStay.Site.Controllers
         [Route("{id:int}/{name?}")]
         public ActionResult Details(int id, string name)
         {
-            using (var db = new CosStayContext())
-            {
-                var instance = ValidateDetails(db.EventInstances, id, name);
+                var instance = ValidateDetails<EventInstance>(_es, id, name);
 
                 string userRsvp = "";
                 bool userAttending = false;
@@ -104,7 +105,7 @@ namespace CosStay.Site.Controllers
                                 instance.StartDate = DateTime.Parse(eventDetails.start_time);
                                 instance.Name = eventDetails.name;
                                 instance.DateUpdated = dateUpdated;
-                                db.SaveChanges();
+                                _es.Save();
                             }
                         }
 
@@ -129,7 +130,7 @@ namespace CosStay.Site.Controllers
 
                 var vm = new EventInstanceViewModel
                 {
-                    EventInstanceId = instance.EventInstanceId,
+                    EventInstanceId = instance.Id,
                     Name = instance.Name,
                     Address = instance.Venue != null ? instance.Venue.Address : "",
                     DateUpdated = instance.DateUpdated,
@@ -137,7 +138,7 @@ namespace CosStay.Site.Controllers
                     EndDate = instance.EndDate,
                     FacebookEventId = instance.FacebookEventId,
                     Location = instance.Venue != null ? instance.Venue.Location.Name : "",
-                    ParentEventId = instance.Event != null ? instance.Event.EventId : 0,
+                    ParentEventId = instance.Event != null ? instance.Event.Id : 0,
                     Photos = instance.Photos.ToArray(),
                     StartDate = instance.StartDate,
                     Url = instance.Url,
@@ -149,7 +150,6 @@ namespace CosStay.Site.Controllers
                 };
 
                 return View(vm);
-            }
         }
 
         [Authorize(Roles = "Admin")]
@@ -193,7 +193,7 @@ namespace CosStay.Site.Controllers
                         instance.StartDate = vm.StartDate;
                         db.EventInstances.Add(instance);
                         db.SaveChanges();
-                        return RedirectToAction("Details", new { id = instance.EventInstanceId, name = SafeUri(instance.Name)});
+                        return RedirectToAction("Details", new { id = instance.Id, name = SafeUri(instance.Name)});
                     }
                 }
                 return View(vm);
@@ -218,7 +218,7 @@ namespace CosStay.Site.Controllers
                     StartDate = instance.StartDate,
                     VenueLatLng = instance.Venue != null ? instance.Venue.LatLng : null,
                     VenueName = instance.Venue != null ? instance.Venue.Name : null,
-                    EventInstanceId = instance.EventInstanceId
+                    EventInstanceId = instance.Id
                 };
                 return View(vm);
             }

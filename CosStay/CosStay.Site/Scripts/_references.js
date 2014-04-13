@@ -6,3 +6,6 @@
 /// <reference path="jquery.validate.unobtrusive.js" />
 /// <reference path="respond.matchmedia.addlistener.js" />
 /// <reference path="bootstrap.js" />
+/// <reference path="knockout-3.1.0.js" />
+/// <reference path="knockout.mapping-latest.js" />
+/// <reference path="cosstay.viewmodels.js" />

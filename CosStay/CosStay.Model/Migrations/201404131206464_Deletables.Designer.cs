@@ -7,13 +7,13 @@ namespace CosStay.Model.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.1.0-30225")]
-    public sealed partial class Initial : IMigrationMetadata
+    public sealed partial class Deletables : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(Initial));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(Deletables));
         
         string IMigrationMetadata.Id
         {
-            get { return "201403300318233_Initial"; }
+            get { return "201404131206464_Deletables"; }
         }
         
         string IMigrationMetadata.Source

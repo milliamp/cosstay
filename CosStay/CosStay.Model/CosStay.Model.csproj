@@ -63,13 +63,21 @@
     <Compile Include="CosStayDataIntegrityModel.cs" />
     <Compile Include="CosStayModel.cs" />
     <Compile Include="CosStaySecurityModel.cs" />
-    <Compile Include="Migrations\201403300318233_Initial.cs" />
-    <Compile Include="Migrations\201403300318233_Initial.Designer.cs">
-      <DependentUpon>201403300318233_Initial.cs</DependentUpon>
+    <Compile Include="IAddable.cs" />
+    <Compile Include="IDeletable.cs" />
+    <Compile Include="IDestoyable.cs" />
+    <Compile Include="IEntity.cs" />
+    <Compile Include="Migrations\201404130228334_Initial.cs" />
+    <Compile Include="Migrations\201404130228334_Initial.Designer.cs">
+      <DependentUpon>201404130228334_Initial.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201403300439482_DoubleLatLng.cs" />
-    <Compile Include="Migrations\201403300439482_DoubleLatLng.Designer.cs">
-      <DependentUpon>201403300439482_DoubleLatLng.cs</DependentUpon>
+    <Compile Include="Migrations\201404131132523_NamedRooms.cs" />
+    <Compile Include="Migrations\201404131132523_NamedRooms.Designer.cs">
+      <DependentUpon>201404131132523_NamedRooms.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201404131206464_Deletables.cs" />
+    <Compile Include="Migrations\201404131206464_Deletables.Designer.cs">
+      <DependentUpon>201404131206464_Deletables.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -83,11 +91,14 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201403300318233_Initial.resx">
-      <DependentUpon>201403300318233_Initial.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201404130228334_Initial.resx">
+      <DependentUpon>201404130228334_Initial.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201403300439482_DoubleLatLng.resx">
-      <DependentUpon>201403300439482_DoubleLatLng.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201404131132523_NamedRooms.resx">
+      <DependentUpon>201404131132523_NamedRooms.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201404131206464_Deletables.resx">
+      <DependentUpon>201404131206464_Deletables.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

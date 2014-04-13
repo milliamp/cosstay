@@ -1,26 +1,25 @@
-﻿@model CosStay.Model.AccomodationVenue
+﻿@model CosStay.Site.Models.AccomodationVenueViewModel
+@using Newtonsoft.Json;
 
 @{
     ViewBag.Title = "Edit";
 }
-
 <h2>Edit</h2>
 
-
-@using (Html.BeginForm())
+@using (Html.BeginForm("Edit", "AccomodationVenue", ViewContext.RouteData.Values, FormMethod.Post, new Dictionary<string, object> { {"data-bind", "submit: saveForm"} }))
 {
     @Html.AntiForgeryToken()
-    
+
     <div class="form-horizontal">
-        <h4>AccomodationVenue</h4>
+        <h4>Details</h4>
         <hr />
         @Html.ValidationSummary(true)
-        @Html.HiddenFor(model => model.AccomodationVenueId)
+        @Html.HiddenFor(model => model.Id)
 
         <div class="form-group">
             @Html.LabelFor(model => model.Name, new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.Name)
+                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { data_bind = "value: Name" } })
                 @Html.ValidationMessageFor(model => model.Name)
             </div>
         </div>
@@ -28,7 +27,7 @@
         <div class="form-group">
             @Html.LabelFor(model => model.Address, new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.Address)
+                @Html.EditorFor(model => model.Address, new { htmlAttributes = new { data_bind = "value: Address" } })
                 @Html.ValidationMessageFor(model => model.Address)
             </div>
         </div>
@@ -36,7 +35,7 @@
         <div class="form-group">
             @Html.LabelFor(model => model.AllowsBedSharing, new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.AllowsBedSharing)
+                @Html.EditorFor(model => model.AllowsBedSharing, new { htmlAttributes = new { data_bind = "checked: AllowsBedSharing" } })
                 @Html.ValidationMessageFor(model => model.AllowsBedSharing)
             </div>
         </div>
@@ -44,23 +43,71 @@
         <div class="form-group">
             @Html.LabelFor(model => model.AllowsMixedRooms, new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.AllowsMixedRooms)
+                @Html.EditorFor(model => model.AllowsMixedRooms, new { htmlAttributes = new { data_bind = "checked: AllowsMixedRooms" } })
                 @Html.ValidationMessageFor(model => model.AllowsMixedRooms)
             </div>
         </div>
 
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Save" class="btn btn-default" />
-            </div>
+    </div>
+
+<div class="form-horizontal">
+    <h4>Rooms</h4>
+    <hr />
+    <ul class="rooms">
+        <!-- ko foreach: Rooms -->
+        <li class="room" data-bind="css: { deleted: IsDeleted() }">
+            <span data-bind="text: Id"></span>
+            <input type="text" data-bind="value: Name" />
+            <ul class="beds">
+                <!-- ko foreach: Beds -->
+                <li class="bed">
+                    <span data-bind="text: BedSize"></span>
+                    <span data-bind="text: BedType"></span>
+
+                    <select data-bind="options: $root.AvailableBedSizes,
+                       optionsText: 'Name',
+                       optionsValue: 'Id',
+                       value: BedSizeId,
+                       optionsCaption: 'Choose...'"></select> (<select data-bind="options: $root.AvailableBedTypes,
+                       optionsText: 'Name',
+                       optionsValue: 'Id',
+                       value: BedTypeId,
+                       optionsCaption: 'Choose...'"></select>)
+                </li>
+                <!-- /ko -->
+                <li class="add-bed">
+                    <button data-bind="click: addBed">+</button>
+                </li>
+            </ul>
+            <button data-bind="click: removeRoom">-</button>
+        </li>
+        <!-- /ko -->
+        <li class="add-room">
+            <button data-bind="click: addRoom">+</button>
+        </li>
+    </ul>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Save" class="btn btn-default" />
         </div>
     </div>
+</div>
+    
 }
-
 <div>
     @Html.ActionLink("Back to List", "Index")
 </div>
 
+<script>
+    var initialData = @Html.Raw(JsonConvert.SerializeObject(Model));
+
+    var viewModel = new accomodationVenueViewModel();
+    ko.mapping.fromJS(initialData, mapping, viewModel);
+    ko.applyBindings(viewModel);
+</script>
+
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/cosstay.viewmodels.js"></script>
 }

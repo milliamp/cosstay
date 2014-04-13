@@ -1,4 +1,5 @@
-﻿using CosStay.Model;
+﻿using CosStay.Core.Services;
+using CosStay.Model;
 using Facebook;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
@@ -13,7 +14,7 @@ using System.Web;
 using System.Web.Mvc;
 
 namespace CosStay.Site.Controllers
-{    
+{
     public class BaseController : Controller
     {
         protected override void Initialize(System.Web.Routing.RequestContext requestContext)
@@ -53,9 +54,9 @@ namespace CosStay.Site.Controllers
 
         }
 
-        protected T ValidateDetails<T>(DbSet<T> set, int id, string name) where T : NamedEntity
+        protected T ValidateDetails<T>(IEntityStore es, int id, string name) where T : NamedEntity
         {
-            var instance = set.Find(id);
+            var instance = es.Get<T>(id);
             if (instance == null)
                 throw new HttpException(404, id + " not found");
 
@@ -94,6 +95,16 @@ namespace CosStay.Site.Controllers
                     return null;
                 return int.Parse(claim.Value);
             }
+        }
+
+        protected override JsonResult Json(object data, string contentType, System.Text.Encoding contentEncoding, JsonRequestBehavior behavior)
+        {
+            return new JsonNetResult { 
+                Data = data, 
+                ContentEncoding = contentEncoding,
+                ContentType = contentType,
+                JsonRequestBehavior = behavior
+            };
         }
     }
 }

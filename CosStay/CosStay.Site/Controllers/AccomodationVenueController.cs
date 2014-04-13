@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.Entity;
-using System.Linq;
+﻿using System.Linq;
 using System.Net;
-using System.Web;
 using System.Web.Mvc;
 using CosStay.Model;
-using System.Threading.Tasks;
+using CosStay.Site.Models;
+using AutoMapper;
+using System;
+using System.Web;
+using CosStay.Core.Services;
 
 namespace CosStay.Site.Controllers
 {
@@ -15,19 +14,26 @@ namespace CosStay.Site.Controllers
     [Route("{action=index}")]
     public class AccomodationVenueController : BaseController
     {
-        private CosStayContext db = new CosStayContext();
+        private IEntityStore _es;
+
+        private IAccomodationVenueService _accomodationVenueService;
+        public AccomodationVenueController(IAccomodationVenueService accomodationVenueService, IEntityStore entityStore)
+        {
+            _accomodationVenueService = accomodationVenueService;
+            _es = entityStore;
+        }
 
         // GET: /AccomodationVenue/
         public ActionResult Index()
         {
-            return View(db.AccomodationVenues.ToList());
+            return View(_es.GetAll<AccomodationVenue>().ToList());
         }
 
         // GET: /AccomodationVenue/Details/5
         [Route("{id:int}/{name?}")]
         public ActionResult Details(int id, string name)
         {
-            var instance = ValidateDetails(db.AccomodationVenues, id, name);
+            var instance = ValidateDetails<AccomodationVenue>(_es, id, name);
             return View(instance);
         }
 
@@ -43,17 +49,23 @@ namespace CosStay.Site.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         [Route("set-up/")]
         public ActionResult Create([Bind(Include="Name,Address,AllowsBedSharing,AllowsMixedRooms")] AccomodationVenue accomodationvenue)
         {
             if (ModelState.IsValid)
             {
                 var currentUser = CurrentUser;
+                
+                _es.Add(accomodationvenue);
+                
                 accomodationvenue.LatLng = new LatLng();
-                db.AccomodationVenues.Add(accomodationvenue);
-                accomodationvenue.Owner = new User { Id = currentUser.Id };
-                db.Users.Attach(accomodationvenue.Owner);
-                db.SaveChanges();
+                accomodationvenue.Owner = _es.Get<User>(currentUser.Id);
+                accomodationvenue.DateAdded = DateTimeOffset.Now;
+                
+                //db.Users.Attach(accomodationvenue.Owner);
+                //db.SaveChanges();
+                _es.Save();
                 return RedirectToAction("Index");
             }
 
@@ -68,29 +80,55 @@ namespace CosStay.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            AccomodationVenue accomodationvenue = db.AccomodationVenues.Find(id);
+            AccomodationVenue accomodationvenue = _es.Get<AccomodationVenue>(id.Value);
             if (accomodationvenue == null)
             {
                 return HttpNotFound();
             }
-            return View(accomodationvenue);
+
+            var vm = GetViewModel(accomodationvenue);
+
+            return View(vm);
         }
 
         // POST: /AccomodationVenue/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        [ValidateJsonAntiForgeryToken]
         [Route("edit/{id:int}")]
-        public ActionResult Edit([Bind(Include="Name,Address,AllowsBedSharing,AllowsMixedRooms")] AccomodationVenue accomodationvenue)
+        public JsonResult Edit(int id, AccomodationVenueViewModel accomodationVenueViewModel)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(accomodationvenue).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                AccomodationVenue instance = _es.Get<AccomodationVenue>(id);
+                /*if (instance.Owner.Id != CurrentUser.Id)
+                {
+                    ModelState.AddModelError("Access Denied", new HttpException(403, "Access Denied"));
+                    return View(accomodationVenueViewModel);
+                }*/
+                var dtoInstance = Mapper.Map<AccomodationVenueViewModel, AccomodationVenue>(accomodationVenueViewModel);
+                
+                
+                //instance.Rooms = dtoInstance.Rooms;
+                
+
+                /*// TODO: Check Authorisation based on venue
+                instance.Address = accomodationVenueViewModel.Address;
+                instance.AllowsBedSharing = accomodationVenueViewModel.AllowsBedSharing;
+                instance.AllowsMixedRooms = accomodationVenueViewModel.AllowsMixedRooms;
+                instance.Features = accomodationVenueViewModel.Features;
+                instance.LatLng = accomodationVenueViewModel.LatLng ?? new LatLng(0,0);
+                instance.Location = accomodationVenueViewModel.Location;
+                instance.Photos = accomodationVenueViewModel.Photos;
+                // TODO: Rooms merge
+                //instance.Rooms = accomodationVenueViewModel.Rooms.sel;*/
+                _accomodationVenueService.UpdateVenue(dtoInstance);
             }
-            return View(accomodationvenue);
+
+
+            AccomodationVenue vmInstance = _es.Get<AccomodationVenue>(id);
+            return Json(GetViewModel(vmInstance));
         }
 
         // GET: /AccomodationVenue/Delete/5
@@ -101,7 +139,7 @@ namespace CosStay.Site.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            AccomodationVenue accomodationvenue = db.AccomodationVenues.Find(id);
+            AccomodationVenue accomodationvenue = _es.Get<AccomodationVenue>(id.Value);
             if (accomodationvenue == null)
             {
                 return HttpNotFound();
@@ -115,9 +153,10 @@ namespace CosStay.Site.Controllers
         [Route("delete/{id:int}")]
         public ActionResult DeleteConfirmed(int id)
         {
-            AccomodationVenue accomodationvenue = db.AccomodationVenues.Find(id);
-            db.AccomodationVenues.Remove(accomodationvenue);
-            db.SaveChanges();
+            AccomodationVenue accomodationvenue = _es.Get<AccomodationVenue>(id);
+            //TODO:Delete
+            //db.AccomodationVenues.Remove(accomodationvenue);
+            //db.SaveChanges();
             return RedirectToAction("Index");
         }
 
@@ -125,9 +164,18 @@ namespace CosStay.Site.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+                _es.Dispose();
             }
             base.Dispose(disposing);
+        }
+
+        public AccomodationVenueViewModel GetViewModel(AccomodationVenue venue)
+        {
+            var vm = Mapper.Map<AccomodationVenueViewModel>(venue);
+            
+            vm.AvailableBedSizes = _es.GetAll<BedSize>().ToList();
+            vm.AvailableBedTypes = _es.GetAll<BedType>().ToList();
+            return vm;
         }
     }
 }

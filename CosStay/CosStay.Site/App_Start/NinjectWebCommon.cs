@@ -72,7 +72,11 @@ namespace CosStay.Site.App_Start
             kernel.Bind<IAppFacebookService>().To<AppFacebookService>().InSingletonScope()
                 .WithConstructorArgument("appId", ConfigurationManager.AppSettings["FacebookAppId"])
                 .WithConstructorArgument("appSecret", ConfigurationManager.AppSettings["FacebookAppSecret"]);
+            
             kernel.Bind<IDateTimeService>().To<DateTimeService>().InSingletonScope();
+            kernel.Bind<IAccomodationVenueService>().To<AccomodationVenueService>().InRequestScope();
+            kernel.Bind<IEntityStore>().To<EntityStore>().InRequestScope();
+            
         }        
     }
 }
