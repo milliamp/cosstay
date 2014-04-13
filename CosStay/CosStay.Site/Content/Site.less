@@ -41,6 +41,21 @@ input[type="checkbox"].input-validation-error {
     display: none;
 }
 
+h5 {
+    margin: 0;
+    padding: 2px 0;
+    border-bottom: 1px solid @brand-primary;
+    font-size: 1.1em;
+}
+h5 input{
+    border: 0;
+    font-size:inherit;
+    color:inherit;
+    font-weight: bold;
+    padding: 2px 0;
+
+}
+
 .rooms
 {
     list-style: none;
@@ -54,6 +69,7 @@ input[type="checkbox"].input-validation-error {
         border: 1px solid @brand-primary;
         margin: 10px;
         padding: 10px;
+        position: relative;
 
         .beds {
             list-style: none;
@@ -61,8 +77,37 @@ input[type="checkbox"].input-validation-error {
             margin: 0;
 
             .bed {
-
+                .edit-bed {
+                    display: none;
+                }
+                .display-bed {
+                    display: block;
+                }
             }
+            .bed.edit-bed {
+                .edit-bed {
+                    display: block;
+                }
+                .display-bed {
+                    display: none;
+                }
+            }
+        }
+
+        .id {
+            position: absolute;
+            bottom: 1px;
+            left: 1px;
+            color: #999;
+            font-size:0.7em;            
+        }
+        .id::before {
+                content: '#'
+            }
+        .remove-room {
+            position: absolute;
+            top: 1px;
+            right: 1px;
         }
     }
     .room.deleted {

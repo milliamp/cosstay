@@ -6093,6 +6093,19 @@ input[type="checkbox"].input-validation-error {
 .validation-summary-valid {
   display: none;
 }
+h5 {
+  margin: 0;
+  padding: 2px 0;
+  border-bottom: 1px solid #2fa4e7;
+  font-size: 1.1em;
+}
+h5 input {
+  border: 0;
+  font-size: inherit;
+  color: inherit;
+  font-weight: bold;
+  padding: 2px 0;
+}
 .rooms {
   list-style: none;
   padding: 0;
@@ -6105,11 +6118,39 @@ input[type="checkbox"].input-validation-error {
   border: 1px solid #2fa4e7;
   margin: 10px;
   padding: 10px;
+  position: relative;
 }
 .rooms .room .beds {
   list-style: none;
   padding: 0;
   margin: 0;
+}
+.rooms .room .beds .bed .edit-bed {
+  display: none;
+}
+.rooms .room .beds .bed .display-bed {
+  display: block;
+}
+.rooms .room .beds .bed.edit-bed .edit-bed {
+  display: block;
+}
+.rooms .room .beds .bed.edit-bed .display-bed {
+  display: none;
+}
+.rooms .room .id {
+  position: absolute;
+  bottom: 1px;
+  left: 1px;
+  color: #999;
+  font-size: 0.7em;
+}
+.rooms .room .id::before {
+  content: '#';
+}
+.rooms .room .remove-room {
+  position: absolute;
+  top: 1px;
+  right: 1px;
 }
 .rooms .room.deleted {
   opacity: 0.5;

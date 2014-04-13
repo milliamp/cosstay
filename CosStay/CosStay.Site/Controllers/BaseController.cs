@@ -15,8 +15,13 @@ using System.Web.Mvc;
 
 namespace CosStay.Site.Controllers
 {
-    public class BaseController : Controller
+    public abstract class BaseController : Controller
     {
+        protected IEntityStore _es;
+        protected BaseController(IEntityStore entityStore)
+        {
+            _es = entityStore;
+        }
         protected override void Initialize(System.Web.Routing.RequestContext requestContext)
         {
             base.Initialize(requestContext);

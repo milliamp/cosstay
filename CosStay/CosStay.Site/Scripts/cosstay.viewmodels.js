@@ -1,7 +1,7 @@
 ﻿
 var accomodationVenueViewModel = function (data) {
     this.$type = 'accomodationVenueViewModel';
-
+    var self = this;
     this.Id = ko.observable();
     this.LatLng = ko.observable();
     this.Address = ko.observable();
@@ -13,14 +13,22 @@ var accomodationVenueViewModel = function (data) {
     this.AllowsMixedRooms = ko.observable();
     this.Photos = ko.observableArray();
     this.Rooms = ko.observableArray();
-
+    this.BedCount = ko.computed(function () {
+        var sum = 0;
+        var b = ko.utils.arrayForEach(self.Rooms(), function (i) {
+            if (!i.IsDeleted())
+                sum += i.Beds().length;
+        })
+        return sum;
+    });
     if (data)
     {
         ko.mapping.fromJS(data, mapping, this);
-        }
+    }
 
     this.addRoom = function () {
         var n = new accomodationRoomViewModel();
+        n.Name("Room " + this.Rooms().length);
         this.Rooms.push(n);
         return n;
     };
@@ -28,6 +36,7 @@ var accomodationVenueViewModel = function (data) {
 var accomodationRoomViewModel = function (data) {
     this.$type = 'accomodationRoomViewModel';
     this.Id = ko.observable();
+    this.Name = ko.observable();
     this.AccomodationVenue = ko.observable();
     this.Beds = ko.observableArray();
     this.Features = ko.observableArray();

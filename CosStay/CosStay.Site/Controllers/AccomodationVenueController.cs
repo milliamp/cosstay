@@ -14,13 +14,11 @@ namespace CosStay.Site.Controllers
     [Route("{action=index}")]
     public class AccomodationVenueController : BaseController
     {
-        private IEntityStore _es;
-
         private IAccomodationVenueService _accomodationVenueService;
         public AccomodationVenueController(IAccomodationVenueService accomodationVenueService, IEntityStore entityStore)
+            : base(entityStore)
         {
             _accomodationVenueService = accomodationVenueService;
-            _es = entityStore;
         }
 
         // GET: /AccomodationVenue/
@@ -172,7 +170,9 @@ namespace CosStay.Site.Controllers
         public AccomodationVenueViewModel GetViewModel(AccomodationVenue venue)
         {
             var vm = Mapper.Map<AccomodationVenueViewModel>(venue);
-            
+            vm.Rooms = vm.Rooms.Where(r => !r.IsDeleted).ToList();
+
+
             vm.AvailableBedSizes = _es.GetAll<BedSize>().ToList();
             vm.AvailableBedTypes = _es.GetAll<BedType>().ToList();
             return vm;

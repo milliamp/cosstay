@@ -13,18 +13,20 @@ using System.Diagnostics;
 using CosStay.Model;
 using CosStay.Site.Models;
 using CosStay.Site.Controllers;
+using CosStay.Core.Services;
 
 namespace CosPlay.Site.Controllers
 {
     [Authorize]
     public class AccountController : BaseController
     {
-        public AccountController()
-            : this(new UserManager<User>(new UserStore<User>(new CosStayContext())))
+        public AccountController(IEntityStore entityStore)
+            : this(new UserManager<User>(new UserStore<User>(new CosStayContext())), entityStore)
         {
         }
 
-        public AccountController(UserManager<User> userManager)
+        public AccountController(UserManager<User> userManager, IEntityStore entityStore)
+            : base(entityStore)
         {
             UserManager = userManager;
         }

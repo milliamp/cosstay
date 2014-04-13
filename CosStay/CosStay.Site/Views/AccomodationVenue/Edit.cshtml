@@ -48,6 +48,13 @@
             </div>
         </div>
 
+        <div class="form-group">
+            <label class="control-label  col-md-2">Total Beds</label>
+            <div class="col-md-10">
+                <span data-bind="text: BedCount" />
+            </div>
+        </div>
+
     </div>
 
 <div class="form-horizontal">
@@ -56,30 +63,33 @@
     <ul class="rooms">
         <!-- ko foreach: Rooms -->
         <li class="room" data-bind="css: { deleted: IsDeleted() }">
-            <span data-bind="text: Id"></span>
-            <input type="text" data-bind="value: Name" />
+            <span class="id" data-bind="text: Id"></span>
+            <h5><input type="text" data-bind="value: Name" /></h5>
             <ul class="beds">
                 <!-- ko foreach: Beds -->
                 <li class="bed">
-                    <span data-bind="text: BedSize"></span>
-                    <span data-bind="text: BedType"></span>
-
-                    <select data-bind="options: $root.AvailableBedSizes,
-                       optionsText: 'Name',
-                       optionsValue: 'Id',
-                       value: BedSizeId,
-                       optionsCaption: 'Choose...'"></select> (<select data-bind="options: $root.AvailableBedTypes,
-                       optionsText: 'Name',
-                       optionsValue: 'Id',
-                       value: BedTypeId,
-                       optionsCaption: 'Choose...'"></select>)
+                    <div class="display-bed" data-bind="click: function () { $($element.parentNode).toggleClass('edit-bed')}">
+                        <span data-bind="text: BedSize"></span>
+                        <span data-bind="text: BedType"></span>
+                    </div>
+                    <div class="edit-bed">
+                        <select data-bind="options: $root.AvailableBedSizes,
+                           optionsText: 'Name',
+                           optionsValue: 'Id',
+                           value: BedSizeId,
+                           optionsCaption: 'Choose...'"></select> (<select data-bind="options: $root.AvailableBedTypes,
+                           optionsText: 'Name',
+                           optionsValue: 'Id',
+                           value: BedTypeId,
+                           optionsCaption: 'Choose...'"></select>)
+                    </div>
                 </li>
                 <!-- /ko -->
                 <li class="add-bed">
                     <button data-bind="click: addBed">+</button>
                 </li>
             </ul>
-            <button data-bind="click: removeRoom">-</button>
+            <button class="remove-room" data-bind="click: removeRoom">x</button>
         </li>
         <!-- /ko -->
         <li class="add-room">

@@ -22,13 +22,11 @@ namespace CosStay.Site.Controllers
     public class EventController : BaseController
     {
         public EventController(IAppFacebookService appFacebookService, IUserFacebookService userFacebookService, IEntityStore entityStore)
+            : base(entityStore)
         {
-            _es = entityStore;
             _appFacebookService = appFacebookService;
             _userFacebookService = userFacebookService;
         }
-
-        private IEntityStore _es;
 
         private IAppFacebookService _appFacebookService;
         public FacebookClient AppFacebookClient
