@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.Owin.Security;
 using System.Threading;
 using System.Diagnostics;
@@ -20,18 +19,20 @@ namespace CosPlay.Site.Controllers
     [Authorize]
     public class AccountController : BaseController
     {
-        public AccountController(IEntityStore entityStore)
-            : this(new UserManager<User>(new UserStore<User>(new CosStayContext())), entityStore)
+        public AccountController(IEntityStore entityStore, IUserService userService)
+            :base(entityStore)
         {
+            _userService = userService;
         }
+        private IUserService _userService;
 
-        public AccountController(UserManager<User> userManager, IEntityStore entityStore)
-            : base(entityStore)
+        public UserManager<User> UserManager
         {
-            UserManager = userManager;
+            get
+            {
+                return _userService.UserManager;
+            }
         }
-
-        public UserManager<User> UserManager { get; private set; }
 
         //
         // GET: /Account/Login
@@ -320,17 +321,14 @@ namespace CosPlay.Site.Controllers
             {
                 try
                 {
-                    using (CosStayContext db = new CosStayContext())
-                    {
-                        UserStore<User> userstore = new UserStore<User>(db);
-                        var user = await userstore.FindByIdAsync(User.Identity.GetUserId());
+                        
+                        var user = await UserManager.FindByIdAsync(User.Identity.GetUserId());
                         user.Email = model.Email;
                         user.PhoneNumber = model.Phone;
                         user.Name = model.Name;
-                        await userstore.UpdateAsync(user);
-                        await db.SaveChangesAsync();
+                    
+                        await UserManager.UpdateAsync(user);
                         return RedirectToAction("Manage", new { Message = "Your properties have been updated." });
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -358,15 +356,11 @@ namespace CosPlay.Site.Controllers
             return Task.Run(async () =>
             {
                 UserPropertiesViewModel uservm = new UserPropertiesViewModel();
-                using (CosStayContext db = new CosStayContext())
-                {
-                    try
-                    {
-                        UserStore<User> userstore = new UserStore<User>(db);
-                        var user = await userstore.FindByIdAsync(User.Identity.GetUserId());
+                try {
+                        var user = await UserManager.FindByIdAsync(User.Identity.GetUserId());
 
                         AddPropertiesFromClaims(user);
-                        var save = db.SaveChangesAsync();
+                        var save = UserManager.UpdateAsync(user);
                         uservm.Email = user.Email;
                         uservm.Name = user.Name;
                         uservm.Phone = user.PhoneNumber;
@@ -377,7 +371,7 @@ namespace CosPlay.Site.Controllers
                         Trace.TraceError("Error occurred while getting user properties: {0}", ex.ToString());
                     }
 
-                }
+                
                 return (ActionResult)PartialView("_UserPropertiesListPartial", uservm);
             }).Result;
         }
@@ -400,12 +394,6 @@ namespace CosPlay.Site.Controllers
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && UserManager != null)
-            {
-                UserManager.Dispose();
-                UserManager = null;
-            }
-            base.Dispose(disposing);
         }
 
         #region Helpers

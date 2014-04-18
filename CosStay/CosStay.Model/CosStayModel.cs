@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNet.Identity.EntityFramework;
+﻿using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -86,7 +86,7 @@ namespace CosStay.Model
         public string ShortName { get; set; }
     }
 
-    public class User:IdentityUser
+    public class User : IUser<string>, IAddable,IDeletable
     {
         public string Name { get; set; }
         public virtual Location Location { get; set; }
@@ -101,7 +101,192 @@ namespace CosStay.Model
 
         //public virtual List<Role> Roles { get; set; }
         public virtual List<ContactMethod> ContactMethods { get; set; }
+
+        // From AspNet.Identity.EntityFramework
+        // Summary:
+        //     Used to record failures for the purposes of lockout
+        public virtual int AccessFailedCount { get; set; }
+        //
+        // Summary:
+        //     Navigation property for user claims
+        public virtual ICollection<IdentityUserClaim> Claims { get; set; }
+        //
+        // Summary:
+        //     Email
+        public virtual string Email { get; set; }
+        //
+        // Summary:
+        //     True if the email is confirmed, default is false
+        public virtual bool EmailConfirmed { get; set; }
+        //
+        // Summary:
+        //     User ID (Primary Key)
+        public virtual string Id { get; set; }
+        //
+        // Summary:
+        //     Is lockout enabled for this user
+        public virtual bool LockoutEnabled { get; set; }
+        //
+        // Summary:
+        //     DateTime in UTC when lockout ends, any time in the past is considered not
+        //     locked out.
+        public virtual DateTime? LockoutEndDateUtc { get; set; }
+        //
+        // Summary:
+        //     Navigation property for user logins
+        public virtual ICollection<IdentityUserLogin> Logins { get; set; }
+        //
+        // Summary:
+        //     The salted/hashed form of the user password
+        public virtual string PasswordHash { get; set; }
+        //
+        // Summary:
+        //     PhoneNumber for the user
+        public virtual string PhoneNumber { get; set; }
+        //
+        // Summary:
+        //     True if the phone number is confirmed, default is false
+        public virtual bool PhoneNumberConfirmed { get; set; }
+        //
+        // Summary:
+        //     Navigation property for user roles
+        public virtual ICollection<IdentityUserRole> Roles { get; private set; }
+        //
+        // Summary:
+        //     A random value that should change whenever a users credentials have changed
+        //     (password changed, login removed)
+        public virtual string SecurityStamp { get; set; }
+        //
+        // Summary:
+        //     Is two factor enabled for the user
+        public virtual bool TwoFactorEnabled { get; set; }
+        //
+        // Summary:
+        //     User name
+        public virtual string UserName { get; set; }
+
+        public bool IsDeleted
+        {
+            get;
+            set;
+        }
     }
+
+    // Summary:
+    //     Entity type for a user's login (i.e. facebook, google)
+    //
+    // Type parameters:
+    //   TKey:
+    public class IdentityUserLogin
+    {
+        public IdentityUserLogin()
+        {
+
+        }
+
+        // Summary:
+        //     The login provider for the login (i.e. facebook, google)
+        public virtual string LoginProvider { get; set; }
+        //
+        // Summary:
+        //     Key representing the login for the provider
+        public virtual string ProviderKey { get; set; }
+        //
+        // Summary:
+        //     User Id for the user who owns this login
+        public virtual string UserId { get; set; }
+    }
+
+    // Summary:
+    //     EntityType that represents a user belonging to a role
+    //
+    // Type parameters:
+    //   TKey:
+    public class IdentityUserRole
+    {
+        public IdentityUserRole()
+        {
+
+        }
+
+        // Summary:
+        //     RoleId for the role
+        public virtual string RoleId { get; set; }
+        //
+        // Summary:
+        //     UserId for the user that is in the role
+        public virtual string UserId { get; set; }
+    }
+
+    // Summary:
+    //     EntityType that represents one specific user claim
+    //
+    // Type parameters:
+    //   TKey:
+    public class IdentityUserClaim:IDestoyable
+    {
+        public IdentityUserClaim()
+        {
+
+        }
+
+        // Summary:
+        //     Claim type
+        public virtual string ClaimType { get; set; }
+        //
+        // Summary:
+        //     Claim value
+        public virtual string ClaimValue { get; set; }
+        //
+        // Summary:
+        //     Primary key
+        public virtual int Id { get; set; }
+        //
+        // Summary:
+        //     User Id for the user who owns this login
+        public virtual string UserId { get; set; }
+    }
+
+	/// <summary>
+	///     Represents a Role entity
+	/// </summary>
+	/// <typeparam name="TKey"></typeparam>
+	/// <typeparam name="TUserRole"></typeparam>
+	public class IdentityRole : IRole<string>,IDestoyable
+	{
+		/// <summary>
+		///     Navigation property for users in the role
+		/// </summary>
+		public virtual ICollection<IdentityUserRole> Users
+		{
+			get;
+			private set;
+		}
+		/// <summary>
+		///     Role id
+		/// </summary>
+		public string Id
+		{
+			get;
+			set;
+		}
+		/// <summary>
+		///     Role name
+		/// </summary>
+		public string Name
+		{
+			get;
+			set;
+		}
+		/// <summary>
+		///     Constructor
+		/// </summary>
+		public IdentityRole()
+		{
+			this.Users = new List<IdentityUserRole>();
+		}
+	}
+
 
     public class Audit:IEntity,IAddable
     {

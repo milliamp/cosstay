@@ -1,4 +1,5 @@
-﻿using CosStay.Model;
+﻿using CosStay.Core.Services;
+using CosStay.Model;
 using CosStay.Site.Models;
 using MarkdownSharp;
 using System;
@@ -9,8 +10,12 @@ using System.Web.Mvc;
 
 namespace CosStay.Site.Controllers
 {
-    public class PageController : Controller
+    public class PageController : BaseController
     {
+        public PageController(IEntityStore entityStore):base(entityStore)
+        {
+
+        }
         //
         // GET: /Page/
         public ActionResult Content(string permalink, int? version)
@@ -42,9 +47,7 @@ namespace CosStay.Site.Controllers
 
         public ContentPageViewModel GetContent(string permalink, int? version, string extraText = "")
         {
-            using (var db = new CosStayContext())
-            {
-                var page = db.ContentPages.First(p => p.Uri == permalink);
+                var page = _es.GetAll<ContentPage>().First(p => p.Uri == permalink);
                 /*if (string.IsNullOrWhiteSpace(version) && User.Identity.isAdmin)
                     Response.RedirectToRoutePermanent(new {
 
@@ -83,6 +86,5 @@ namespace CosStay.Site.Controllers
                 return vm;
             }
 
-        }
 	}
 }

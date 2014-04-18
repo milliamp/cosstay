@@ -11,10 +11,10 @@ namespace CosStay.Site.Controllers
     {
         public ActionResult Index()
         {
-            using (var db = new CosStayContext())
+            /*using (var db = new CosStayContext())
             {
                 CosStay.Model.Utilities.SeedData(db);
-            } 
+            } */
 
             return View();
         }

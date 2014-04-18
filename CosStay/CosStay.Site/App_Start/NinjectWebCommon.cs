@@ -35,7 +35,9 @@ namespace CosStay.Site.App_Start
         {
             bootstrapper.ShutDown();
         }
-        
+
+        public static IKernel Kernel { get; set; }
+
         /// <summary>
         /// Creates the kernel that will manage your application.
         /// </summary>
@@ -49,6 +51,7 @@ namespace CosStay.Site.App_Start
                 kernel.Bind<IHttpModule>().To<HttpApplicationInitializationHttpModule>();
 
                 RegisterServices(kernel);
+                Kernel = kernel;
                 return kernel;
             }
             catch
@@ -76,6 +79,7 @@ namespace CosStay.Site.App_Start
             kernel.Bind<IDateTimeService>().To<DateTimeService>().InSingletonScope();
             kernel.Bind<IAccomodationVenueService>().To<AccomodationVenueService>().InRequestScope();
             kernel.Bind<IEntityStore>().To<EntityStore>().InRequestScope();
+            kernel.Bind<IUserService>().To<UserService>().InRequestScope();
             
         }        
     }

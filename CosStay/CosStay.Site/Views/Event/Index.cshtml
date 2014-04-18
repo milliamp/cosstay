@@ -13,7 +13,7 @@
 @foreach (var item in Model) {
     <section class="panel panel-default">
         <header class="panel-heading">
-            @Html.ActionLink(item.Name, "Details", new { id = item.EventInstanceId, name = (ViewContext.Controller as CosStay.Site.Controllers.BaseController).SafeUri(item.Name) })
+            @Html.ActionLink(item.Name, "Details", new { id = item.Id, name = (ViewContext.Controller as CosStay.Site.Controllers.BaseController).SafeUri(item.Name) })
         </header>
         <div class="panel-body">
             <p>
@@ -24,8 +24,8 @@
                 until @Html.DisplayFor(modelItem => item.EndDate.Date)
             </p>
             <p>
-                @Html.ActionLink("Edit", "Edit", new { id = item.EventInstanceId }) |
-                @Html.ActionLink("Delete", "Delete", new { id = item.EventInstanceId })
+                @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.Id })
             </p>
         </div>
     </section>

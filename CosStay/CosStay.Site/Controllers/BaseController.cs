@@ -2,11 +2,9 @@
 using CosStay.Model;
 using Facebook;
 using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Data.Entity;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -50,11 +48,9 @@ namespace CosStay.Site.Controllers
                 if (_currentUser != null)
                     return _currentUser;
 
-                using (CosStayContext db = new CosStayContext())
-                {
-                    _currentUser = db.Users.Find(Identity.GetUserId());
+                    _currentUser = _es.Get<User>(Identity.GetUserId());
                     return _currentUser;
-                }
+                
             }
 
         }

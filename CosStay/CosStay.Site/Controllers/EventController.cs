@@ -1,7 +1,6 @@
 ﻿using CosStay.Model;
 using Facebook;
 using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -49,9 +48,7 @@ namespace CosStay.Site.Controllers
         public ActionResult Index()
         {
 
-            using (var db = new CosStayContext())
-            {
-                if (db.Events.Count() == 0)
+                if (_es.GetAll<EventInstance>().Count() == 0)
                 {
                     var event1 = new Event()
                     {
@@ -69,12 +66,11 @@ namespace CosStay.Site.Controllers
                         Url = "http://milliamp.org"
                     };
                     instance1.Event = event1;
-                    db.Events.Add(event1);
-                    db.EventInstances.Add(instance1);
-                    db.SaveChanges();
+                    _es.Add(event1);
+                    _es.Add(instance1);
+                    _es.Save();
                 }
-                return View(db.EventInstances.ToArray());
-            }
+                return View(_es.GetAll<EventInstance>().ToArray());
 
         }
 
@@ -165,8 +161,6 @@ namespace CosStay.Site.Controllers
         {
                 if (ModelState.IsValid)
                 {
-                    using (var db = new CosStayContext())
-                    {
                         var instance = new EventInstance();
 
                         instance.Description = vm.Description;
@@ -189,10 +183,9 @@ namespace CosStay.Site.Controllers
 
                         instance.Name = vm.Name;
                         instance.StartDate = vm.StartDate;
-                        db.EventInstances.Add(instance);
-                        db.SaveChanges();
+                        _es.Add(instance);
+                        _es.Save();
                         return RedirectToAction("Details", new { id = instance.Id, name = SafeUri(instance.Name)});
-                    }
                 }
                 return View(vm);
         }
@@ -201,9 +194,7 @@ namespace CosStay.Site.Controllers
         [Route("edit/{id:int}")]
         public ActionResult Edit(int id)
         {
-            using (var db = new CosStayContext())
-            {
-                var instance = db.EventInstances.Find(id);
+                var instance = _es.Get<EventInstance>(id);
                 if (instance == null)
                     throw new HttpException(404, "Not Found");
 
@@ -219,7 +210,7 @@ namespace CosStay.Site.Controllers
                     EventInstanceId = instance.Id
                 };
                 return View(vm);
-            }
+            
         }
 
         [Authorize(Roles = "Admin")]
@@ -229,9 +220,7 @@ namespace CosStay.Site.Controllers
         {
             if (ModelState.IsValid)
             {
-                using (var db = new CosStayContext())
-                {
-                    var instance = db.EventInstances.Find(id);
+    var instance = _es.Get<EventInstance>(id);
                     if (instance == null)
                         throw new HttpException(404, "Not Found");
 
@@ -253,10 +242,9 @@ namespace CosStay.Site.Controllers
                     }
                     instance.Name = vm.Name;
                     instance.StartDate = vm.StartDate;
-                    db.SaveChanges();
+                    _es.Save();
                     //instance.Venue.
                 }
-            }
             return View(vm);
         }
 

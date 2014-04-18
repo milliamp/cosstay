@@ -73,7 +73,10 @@
     <Compile Include="Services\Impl\FacebookCredentials.cs" />
     <Compile Include="Services\Impl\FacebookServiceBase.cs" />
     <Compile Include="Services\Impl\UserFacebookService.cs" />
+    <Compile Include="Services\Impl\UserService.cs" />
     <Compile Include="Services\IUserFacebookService.cs" />
+    <Compile Include="Services\IUserService.cs" />
+    <Compile Include="Services\UserStore.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CosStay.Model\CosStay.Model.csproj">
