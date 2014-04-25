@@ -7,7 +7,7 @@
 <h2>Events</h2>
 
 <p>
-    @Html.ActionLink("Create New", "Create")
+    @Html.TrimmedActionLink("Create New", "Create", (CosStay.Model.EventInstance)null)
 </p>
 
 @foreach (var item in Model) {
@@ -24,8 +24,8 @@
                 until @Html.DisplayFor(modelItem => item.EndDate.Date)
             </p>
             <p>
-                @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
-                @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+                @Html.TrimmedActionLink("Edit", "Edit", item, new { id = item.Id }) |
+                @Html.TrimmedActionLink("Delete", "Delete", item, new { id = item.Id })
             </p>
         </div>
     </section>

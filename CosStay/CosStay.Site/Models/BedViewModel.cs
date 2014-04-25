@@ -6,12 +6,7 @@ using System.Web;
 
 namespace CosStay.Site.Models
 {
-    public class BedViewModel
-    {
-        public BedViewModel()
-        {
-
-        }
+    public class BedViewModel {
         /*public BedViewModel(Bed bed)
         {
             BedId = bed.BedId;

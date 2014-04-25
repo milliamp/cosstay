@@ -5,11 +5,7 @@ using System.Web;
 
 namespace CosStay.Site.Models
 {
-    public class UserViewModel
-    {
-        public UserViewModel()
-        {
-        }
+    public class UserViewModel{
         public string Name { get; set; }
     }
 }

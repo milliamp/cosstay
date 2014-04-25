@@ -28,7 +28,7 @@ var accomodationVenueViewModel = function (data) {
 
     this.addRoom = function () {
         var n = new accomodationRoomViewModel();
-        n.Name("Room " + this.Rooms().length);
+        n.Name("Room " + (this.Rooms().length + 1));
         this.Rooms.push(n);
         return n;
     };

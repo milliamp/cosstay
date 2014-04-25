@@ -14,9 +14,9 @@ namespace CosStay.Core.Services.Impl
         {
             _es = entityStore;
         }
-        public Model.AccomodationVenue UpdateVenue(Model.AccomodationVenue dtoInstance)
+        public async Task<Model.AccomodationVenue> UpdateVenueAsync(Model.AccomodationVenue dtoInstance)
         {
-            AccomodationVenue instance = _es.Get<AccomodationVenue>(dtoInstance.Id);
+            AccomodationVenue instance = await _es.GetAsync<AccomodationVenue>(dtoInstance.Id);
             /*var priorRooms = _es.Get<AccomodationVenue>(venue.AccomodationVenueId).Rooms;
 
             var nope = new List<AccomodationRoom>();
@@ -78,8 +78,8 @@ namespace CosStay.Core.Services.Impl
                     }
 
                     //TODO: Can we use Stub Entities here?
-                    bedInstance.BedSize = _es.Get<BedSize>(bed.BedSize.Id);
-                    bedInstance.BedType = _es.Get<BedType>(bed.BedType.Id);
+                    bedInstance.BedSize = await _es.GetAsync<BedSize>(bed.BedSize.Id);
+                    bedInstance.BedType = await _es.GetAsync<BedType>(bed.BedType.Id);
                 }
             }
 
@@ -98,7 +98,7 @@ namespace CosStay.Core.Services.Impl
             /*foreach (var room in dtoInstance.Rooms)
                 _es.Update(room, v => v.Beds);
             _es.Update(dtoInstance, v => v.Rooms);*/
-            _es.Save();
+            await _es.SaveAsync();
             return dtoInstance;
         }
     }

@@ -9,6 +9,6 @@ namespace CosStay.Core.Services
 {
     public interface IAccomodationVenueService
     {
-        Model.AccomodationVenue UpdateVenue(AccomodationVenue venue);
+        Task<Model.AccomodationVenue> UpdateVenueAsync(AccomodationVenue venue);
     }
 }

@@ -13,6 +13,7 @@ using Microsoft.Owin.Security;
 using System.IO;
 using CosStay.Site.Models;
 using CosStay.Core.Services;
+using System.Threading.Tasks;
 
 namespace CosStay.Site.Controllers
 {
@@ -20,11 +21,13 @@ namespace CosStay.Site.Controllers
     [Route("{action=index}")]
     public class EventController : BaseController
     {
-        public EventController(IAppFacebookService appFacebookService, IUserFacebookService userFacebookService, IEntityStore entityStore)
-            : base(entityStore)
+        public EventController(IAppFacebookService appFacebookService, IUserFacebookService userFacebookService, IEntityStore entityStore, IAuthorizationService authorizationService, ILocationService locationService, IVenueService venueService)
+            : base(entityStore, authorizationService)
         {
             _appFacebookService = appFacebookService;
             _userFacebookService = userFacebookService;
+            _locationService = locationService;
+            _venueService = venueService;
         }
 
         private IAppFacebookService _appFacebookService;
@@ -34,7 +37,11 @@ namespace CosStay.Site.Controllers
             {
                 return _appFacebookService.Client;
             }
+
         }
+
+        private ILocationService _locationService;
+        private IVenueService _venueService;
 
         public IUserFacebookService _userFacebookService { get; set; }
         public FacebookClient UserFacebookClient
@@ -45,109 +52,137 @@ namespace CosStay.Site.Controllers
             }
         }
 
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
 
-                if (_es.GetAll<EventInstance>().Count() == 0)
+            if (_es.GetAll<EventInstance>().Count() == 0)
+            {
+                var event1 = new Event()
                 {
-                    var event1 = new Event()
-                    {
-                        Name = "Hamilton Armageddon"
+                    Name = "Hamilton Armageddon"
 
-                    };
-                    var instance1 = new EventInstance()
-                    {
-                        Name = "Hamilton Armageddon 2014",
-                        StartDate = new DateTime(2014, 05, 14),
-                        EndDate = new DateTime(2014, 05, 20),
-                        Description = "ALL THE GEDDON",
-                        FacebookEventId = "581423075239944",
-                        DateUpdated = DateTimeOffset.MinValue,
-                        Url = "http://milliamp.org"
-                    };
-                    instance1.Event = event1;
-                    _es.Add(event1);
-                    _es.Add(instance1);
-                    _es.Save();
-                }
-                return View(_es.GetAll<EventInstance>().ToArray());
+                };
+
+                var event2 = new Event()
+                {
+                    Name = "Auckland Armageddon"
+
+                };
+                var instance1 = new EventInstance()
+                {
+                    Name = "Hamilton Armageddon 2014",
+                    StartDate = new DateTime(2014, 05, 14),
+                    EndDate = new DateTime(2014, 05, 20),
+                    Description = "ALL THE GEDDON",
+                    FacebookEventId = "581423075239944",
+                    DateUpdated = DateTimeOffset.MinValue,
+                    Url = "http://milliamp.org"
+                };
+                var instance2 = new EventInstance()
+                {
+                    Name = "Auckgeddon",
+                    Description = "AUCKLAND",
+                    FacebookEventId = "761346600558963",
+                    StartDate = new DateTime(2014, 05, 14),
+                    EndDate = new DateTime(2014, 05, 20),
+                    DateUpdated = DateTimeOffset.MinValue
+                };
+                instance1.Event = event1;
+
+                instance2.Event = event2;
+                _es.Add(event1);
+                _es.Add(instance1);
+                _es.Add(event2);
+                _es.Add(instance2);
+                await _es.SaveAsync();
+            }
+            return View(_es.GetAll<EventInstance>().ToArray());
 
         }
 
         [Route("{id:int}/{name?}")]
-        public ActionResult Details(int id, string name)
+        [ActionType(ActionType.Read)]
+        public async Task<ActionResult> Details(int id, string name)
         {
-                var instance = ValidateDetails<EventInstance>(_es, id, name);
+            var instance = await ValidateDetailsAsync<EventInstance>(_es, id, name);
 
-                string userRsvp = "";
-                bool userAttending = false;
+            string userRsvp = "";
+            bool userAttending = false;
+            string friendsAttendingSummary = "";
 
-                try
+            try
+            {
+                var fb = UserFacebookClient;
+                if (fb != null)
                 {
-                    var fb = AppFacebookClient;
-                    if (fb != null)
+                    var userId = FacebookUserId;
+                    if (userId.HasValue)
                     {
-                        dynamic eventDetails = fb.Get(instance.FacebookEventId);
+                        dynamic attendingResult = await fb.GetTaskAsync(string.Format("{0}/invited?user={1}", instance.FacebookEventId, userId));
+                        dynamic attending = attendingResult.data[0];
+                        userAttending = attending.rsvp_status == "attending" || attending.rsvp_status == "maybe";
+                        userRsvp = attending.rsvp_status;
 
-                        if (eventDetails.id == instance.FacebookEventId)
-                        {
-                            var dateUpdated = DateTimeOffset.Parse(eventDetails.updated_time);
-                            if (instance.DateUpdated < dateUpdated)
-                            {
-                                instance.Description = eventDetails.description;
-                                instance.EndDate = DateTime.Parse(eventDetails.end_time);
-                                instance.StartDate = DateTime.Parse(eventDetails.start_time);
-                                instance.Name = eventDetails.name;
-                                instance.DateUpdated = dateUpdated;
-                                _es.Save();
-                            }
-                        }
+                        var fql = string.Format("select name, url from profile where id IN (select uid FROM event_member WHERE eid = {0} and uid IN (SELECT uid2 from friend where uid1 = me()))", instance.FacebookEventId);
 
-                        fb = UserFacebookClient;
-                        if (fb != null)
-                        {
-                            var userId = FacebookUserId;
-                            if (userId.HasValue)
-                            {
-                                dynamic attendingResult = fb.Get(string.Format("{0}/invited?user={1}", instance.FacebookEventId, userId));
-                                dynamic attending = attendingResult.data[0];
-                                userAttending = attending.rsvp_status == "attending" || attending.rsvp_status == "maybe";
-                                userRsvp = attending.rsvp_status;
-                            }
-                        }
+                        dynamic friendsAttendingResult = await fb.GetTaskAsync("fql", new { q = fql });
+                        friendsAttendingSummary = FacebookUserSummaryHtmlString(friendsAttendingResult.data);
+                        var i = 0;
                     }
                 }
-                catch (FacebookApiException)
-                {
 
-                }
+            }
+            catch (FacebookApiException)
+            {
 
-                var vm = new EventInstanceViewModel
-                {
-                    EventInstanceId = instance.Id,
-                    Name = instance.Name,
-                    Address = instance.Venue != null ? instance.Venue.Address : "",
-                    DateUpdated = instance.DateUpdated,
-                    Description = instance.Description,
-                    EndDate = instance.EndDate,
-                    FacebookEventId = instance.FacebookEventId,
-                    Location = instance.Venue != null ? instance.Venue.Location.Name : "",
-                    ParentEventId = instance.Event != null ? instance.Event.Id : 0,
-                    Photos = instance.Photos.ToArray(),
-                    StartDate = instance.StartDate,
-                    Url = instance.Url,
-                    VenueLatLng = instance.Venue != null ? instance.Venue.LatLng : null,
-                    VenueName = instance.Venue != null ? instance.Venue.Name : "",
+            }
 
-                    CurrentUserAttending = userAttending,
-                    CurrentUserRsvpStatus = userRsvp
-                };
+            await SetSharedViewParameters();
+            var vm = new EventInstanceViewModel()
+            {
+                EventInstanceId = instance.Id,
+                Name = instance.Name,
+                Address = instance.Venue != null ? instance.Venue.Address : "",
+                DateUpdated = instance.DateUpdated,
+                Description = instance.Description,
+                EndDate = instance.EndDate,
+                FacebookEventId = instance.FacebookEventId,
+                Location = (instance.Venue != null && instance.Venue.Location != null) ? instance.Venue.Location.Name : "",
+                ParentEventId = instance.Event != null ? instance.Event.Id : 0,
+                Photos = instance.Photos.ToArray(),
+                StartDate = instance.StartDate,
+                Url = instance.Url,
+                VenueLatLng = instance.Venue != null ? instance.Venue.LatLng : null,
+                VenueName = instance.Venue != null ? instance.Venue.Name : "",
 
-                return View(vm);
+                CurrentUserAttending = userAttending,
+                CurrentUserRsvpStatus = userRsvp,
+
+                FriendsAttending = friendsAttendingSummary
+
+            };
+
+            return View(vm);
+        }
+
+        protected string FacebookUserSummaryHtmlString(dynamic friends)
+        {
+            var count = friends.Count;
+            if (count == 0)
+            {
+                return "";
+            }
+            if (count == 1)
+                return friends[0].name;
+            if (count == 2)
+                return friends[0].name + " and " + friends[1].name;
+            return friends[0].name + ", " + friends[1].name + " and " + count + " other friends";
+
         }
 
         [Authorize(Roles = "Admin")]
         [Route("create/")]
+        [ActionType(ActionType.Create)]
         public ActionResult Create()
         {
             return View();
@@ -157,95 +192,234 @@ namespace CosStay.Site.Controllers
         [ValidateAntiForgeryToken]
         [Route("create/")]
         [Authorize(Roles = "Admin")]
-        public ActionResult Create([Bind(Include="Description,EndDate,FacebookEventId,Name,StartDate")] EventInstanceViewModel vm)
+        [ActionType(ActionType.Create)]
+        public async Task<ActionResult> Create([Bind(Include = "Description,EndDate,FacebookEventId,Name,StartDate")] EventInstanceViewModel vm)
         {
-                if (ModelState.IsValid)
+            if (ModelState.IsValid)
+            {
+                var instance = new EventInstance();
+
+                instance.Description = vm.Description;
+                instance.EndDate = vm.EndDate;
+
+                if (!string.IsNullOrWhiteSpace(vm.FacebookEventId))
                 {
-                        var instance = new EventInstance();
+                    try
+                    {
+                        var fb = AppFacebookClient;
+                        dynamic eventDetails = await fb.GetTaskAsync(vm.FacebookEventId);
 
-                        instance.Description = vm.Description;
-                        instance.EndDate = vm.EndDate;
-
-                        if (!string.IsNullOrWhiteSpace(vm.FacebookEventId))
-                        {
-                            try
-                            {
-                                var fb = AppFacebookClient;
-                                dynamic eventDetails = fb.Get(vm.FacebookEventId);
-
-                                instance.FacebookEventId = vm.FacebookEventId;
-                            }
-                            catch (FacebookApiException)
-                            {
-                                instance.FacebookEventId = null;
-                            }
-                        }
-
-                        instance.Name = vm.Name;
-                        instance.StartDate = vm.StartDate;
-                        _es.Add(instance);
-                        _es.Save();
-                        return RedirectToAction("Details", new { id = instance.Id, name = SafeUri(instance.Name)});
+                        instance.FacebookEventId = vm.FacebookEventId;
+                    }
+                    catch (FacebookApiException)
+                    {
+                        instance.FacebookEventId = null;
+                    }
                 }
-                return View(vm);
+
+                instance.Name = vm.Name;
+                instance.StartDate = vm.StartDate;
+                _es.Add(instance);
+                await _es.SaveAsync();
+                return RedirectToAction("Details", new { id = instance.Id, name = SafeUri(instance.Name) });
+            }
+            return View(vm);
         }
 
         [Authorize(Roles = "Admin")]
         [Route("edit/{id:int}")]
-        public ActionResult Edit(int id)
+        [ActionType(ActionType.Update)]
+        public async Task<ActionResult> Edit(int id)
         {
-                var instance = _es.Get<EventInstance>(id);
-                if (instance == null)
-                    throw new HttpException(404, "Not Found");
+            var instance = await _es.GetAsync<EventInstance>(id);
+            if (instance == null)
+                throw new HttpException(404, "Not Found");
 
-                var vm = new EventInstanceViewModel
-                {
-                    Description = instance.Description,
-                    EndDate = instance.EndDate,
-                    FacebookEventId = instance.FacebookEventId,
-                    Name = instance.Name,
-                    StartDate = instance.StartDate,
-                    VenueLatLng = instance.Venue != null ? instance.Venue.LatLng : null,
-                    VenueName = instance.Venue != null ? instance.Venue.Name : null,
-                    EventInstanceId = instance.Id
-                };
-                return View(vm);
-            
+            var vm = new EventInstanceViewModel()
+            {
+                Description = instance.Description,
+                EndDate = instance.EndDate,
+                FacebookEventId = instance.FacebookEventId,
+                Name = instance.Name,
+                StartDate = instance.StartDate,
+                VenueLatLng = instance.Venue != null ? instance.Venue.LatLng : null,
+                VenueName = instance.Venue != null ? instance.Venue.Name : null,
+                EventInstanceId = instance.Id
+            };
+            return View(vm);
+
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [Route("edit/{id:int}")]
-        public ActionResult Edit(int id, EventInstanceViewModel vm)
+        [ActionType(ActionType.Update)]
+        public async Task<ActionResult> Edit(int id, EventInstanceViewModel vm)
         {
             if (ModelState.IsValid)
             {
-    var instance = _es.Get<EventInstance>(id);
-                    if (instance == null)
-                        throw new HttpException(404, "Not Found");
+                var instance = await _es.GetAsync<EventInstance>(id);
+                if (instance == null)
+                    throw new HttpException(404, "Not Found");
 
-                    instance.Description = vm.Description;
-                    instance.EndDate = vm.EndDate;
-                    if (!string.IsNullOrWhiteSpace(vm.FacebookEventId))
+                instance.Description = vm.Description;
+                instance.EndDate = vm.EndDate;
+                if (!string.IsNullOrWhiteSpace(vm.FacebookEventId))
+                {
+                    try
                     {
-                        try
-                        {
-                            var fb = AppFacebookClient;
-                            dynamic eventDetails = fb.Get(vm.FacebookEventId);
+                        var fb = AppFacebookClient;
+                        dynamic eventDetails = await fb.GetTaskAsync(vm.FacebookEventId);
 
-                            instance.FacebookEventId = vm.FacebookEventId;
-                        }
-                        catch (FacebookApiException)
+                        instance.FacebookEventId = vm.FacebookEventId;
+                    }
+                    catch (FacebookApiException)
+                    {
+                        instance.FacebookEventId = null;
+                    }
+                }
+                instance.Name = vm.Name;
+                instance.StartDate = vm.StartDate;
+                await _es.SaveAsync();
+                //instance.Venue.
+            }
+            return View(vm);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [Route("updatefromfacebook/{id:int}")]
+        [ActionType(Core.Services.ActionType.Update)]
+        public async Task<ActionResult> UpdateFromFacebook(int id)
+        {
+            var instance = await _es.GetAsync<EventInstance>(id);
+            if (instance == null)
+                throw new HttpException(404, "Not Found");
+            var fb = AppFacebookClient;
+            var vm = new EventInstanceUpdateStatusViewModel()
+            {
+                LastUpdated_Database = instance.DateUpdated,
+                Event_Database = new EventInstanceViewModel()
+                {
+                    EventInstanceId = instance.Id,
+                    Name = instance.Name,
+                    Address = instance.Venue != null ? instance.Venue.Address : "",
+                    DateUpdated = instance.DateUpdated,
+                    Description = instance.Description,
+                    EndDate = instance.EndDate,
+                    FacebookEventId = instance.FacebookEventId,
+                    Location = (instance.Venue != null && instance.Venue.Location != null) ? instance.Venue.Location.Name : "",
+                    ParentEventId = instance.Event != null ? instance.Event.Id : 0,
+                    Photos = instance.Photos.ToArray(),
+                    StartDate = instance.StartDate,
+                    Url = instance.Url,
+                    VenueLatLng = instance.Venue != null ? instance.Venue.LatLng : null,
+                    VenueName = instance.Venue != null ? instance.Venue.Name : ""
+                }
+            };
+
+            if (fb != null)
+            {
+                dynamic eventDetails = await fb.GetTaskAsync(instance.FacebookEventId);
+
+                if (eventDetails.id == instance.FacebookEventId)
+                {
+                    var fbVm = new EventInstanceViewModel();
+
+                    var dateUpdated = DateTimeOffset.Parse(eventDetails.updated_time);
+                    vm.LastUpdated_Facebook = dateUpdated;
+                    fbVm.Description = eventDetails.description;
+                    fbVm.EndDate = DateTime.Parse(eventDetails.end_time);
+                    fbVm.StartDate = DateTime.Parse(eventDetails.start_time);
+                    fbVm.Name = eventDetails.name;
+                    fbVm.DateUpdated = dateUpdated;
+                    fbVm.Url = "https://www.facebook.com/events/" + instance.FacebookEventId;
+                    if (eventDetails.venue != null)
+                    {
+                        var venue = new Venue()
                         {
-                            instance.FacebookEventId = null;
+                            IsDeleted = false,
+                            FacebookId = eventDetails.venue.id,
+                            Location = _locationService.GetByCityCountry(eventDetails.venue.city, eventDetails.venue.country),
+                            Name = eventDetails.location,
+                            LatLng = new LatLng(eventDetails.venue.latitude, eventDetails.venue.longitude),
+                            Address = eventDetails.venue.street
+                        };
+                        var fbvenue = await _venueService.GetOrCreateMatchingVenueAsync(venue);
+                        if (fbvenue != null)
+                        {
+                            fbVm.Address = fbvenue.Address;
+                            if (fbvenue.Location != null)
+                                fbVm.Location = instance.Venue.Location.Name;
+                            fbVm.VenueName = fbvenue.Name;
+                            fbVm.VenueLatLng = fbvenue.LatLng;
                         }
                     }
-                    instance.Name = vm.Name;
-                    instance.StartDate = vm.StartDate;
-                    _es.Save();
-                    //instance.Venue.
+                    vm.Event_Facebook = fbVm;
                 }
+            }
+
             return View(vm);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [Route("updatefromfacebook/{id:int}")]
+        [ActionType(Core.Services.ActionType.Update)]
+        public async Task<ActionResult> UpdateFromFacebook(int id, bool confirm)
+        {
+            var instance = await _es.GetAsync<EventInstance>(id);
+            if (instance == null)
+                throw new HttpException(404, "Not Found");
+            /*
+             * if (location == null)
+            {
+                location = new Location()
+                {
+                    Name = city,
+                    Country = _es.GetAll<Country>().Single(c => c.Name == country || c.ShortName == country),
+                    LatLng = new LatLng()
+                };
+                _es.Add(location);
+            }
+             * 
+             
+            _es.Add(venue);
+            await _es.SaveAsync();
+             */
+            var fb = AppFacebookClient;
+            if (fb != null)
+            {
+                dynamic eventDetails = await fb.GetTaskAsync(instance.FacebookEventId);
+
+                if (eventDetails.id == instance.FacebookEventId)
+                {
+                    var dateUpdated = DateTimeOffset.Parse(eventDetails.updated_time);
+                    if (instance.DateUpdated < dateUpdated)
+                    {
+                        instance.Description = eventDetails.description;
+                        instance.EndDate = DateTime.Parse(eventDetails.end_time);
+                        instance.StartDate = DateTime.Parse(eventDetails.start_time);
+                        instance.Name = eventDetails.name;
+                        instance.DateUpdated = dateUpdated;
+                        instance.Url = "https://www.facebook.com/events/" + instance.FacebookEventId;
+                        if (eventDetails.venue != null)
+                        {
+                            var venue = new Venue()
+                            {
+                                IsDeleted = false,
+                                FacebookId = eventDetails.venue.id,
+                                Location = _locationService.GetByCityCountry(eventDetails.venue.city, eventDetails.venue.country),
+                                Name = eventDetails.location,
+                                LatLng = new LatLng(eventDetails.venue.latitude, eventDetails.venue.longitude),
+                                Address = eventDetails.venue.street
+                            };
+                            instance.Venue = await _venueService.GetOrCreateMatchingVenueAsync(venue);
+                        }
+                        await _es.SaveAsync();
+                    }
+                }
+            }
+            return RedirectToAction("Edit", new { id = id });
         }
 
     }

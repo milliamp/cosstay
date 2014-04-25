@@ -1,25 +1,26 @@
-﻿using CosStay.Model;
+﻿using CosStay.Core.Services;
+using CosStay.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 
 namespace CosStay.Site.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
-        public ActionResult Index()
+        public HomeController(IEntityStore entityStore, IAuthorizationService authorizationService):base(entityStore, authorizationService)
         {
-            /*using (var db = new CosStayContext())
-            {
-                CosStay.Model.Utilities.SeedData(db);
-            } */
 
+        }
+        public async Task<ActionResult> Index()
+        {
             return View();
         }
 
-        public ActionResult About()
+        public  ActionResult About()
         {
             ViewBag.Message = "Your application description page.";
 

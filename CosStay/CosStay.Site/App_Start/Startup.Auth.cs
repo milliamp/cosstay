@@ -38,6 +38,8 @@ namespace CosStay.Site
                 {
                     OnAuthenticated = (context) =>
                     {
+                        // This is a little irresponsible, we don't need to keep all claims and Facebook gives a lot of information such as friends etc
+                        // TODO: Limit to useful claims for the app.
                         const string XmlSchemaString = "http://www.w3.org/2001/XMLSchema#string";
                         foreach (var x in context.User)
                         {

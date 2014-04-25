@@ -7,14 +7,13 @@
 
     <ul class="nav navbar-nav navbar-right">
         <li class="dropdown">
-            @{var c = ViewContext.Controller as CosStay.Site.Controllers.BaseController;}
-            @{var u = c != null ? c.CurrentUser : null;}
-            @{var n = u != null && !string.IsNullOrWhiteSpace(u.Name) ? u.Name : User.Identity.Name;}
+            @{var n = !string.IsNullOrWhiteSpace(ViewBag.CurrentUserName) ? ViewBag.CurrentUserName : User.Identity.Name;}
             
 
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                @if (u != null) { 
-                    @Html.Gravatar(u.Email,20)
+                @if (!string.IsNullOrWhiteSpace(ViewBag.CurrentUserEmail))
+                { 
+                    @Html.Gravatar(ViewBag.CurrentUserEmail as string, 20)
                 }
                 @n <b class="caret"></b>
             </a>

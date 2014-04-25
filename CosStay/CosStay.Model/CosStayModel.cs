@@ -15,7 +15,7 @@ namespace CosStay.Model
         public int Id { get; set; }
     }
 
-    public class Event : NamedEntity,IAddable,IDeletable
+    public class Event : NamedEntity, IAddable, IDeletable, IAuditable
     {
         public virtual List<EventInstance> Instances { get; set; }
         [Display(Name="URL")]
@@ -25,7 +25,7 @@ namespace CosStay.Model
         public bool IsDeleted { get; set; }
     }
 
-    public class EventInstance : NamedEntity, IAddable, IDeletable
+    public class EventInstance : NamedEntity, IAddable, IDeletable, IAuditable
     {
         public virtual Event Event { get; set; }
         [Display(Name = "URL")]
@@ -45,16 +45,17 @@ namespace CosStay.Model
         public bool IsDeleted { get; set; }
     }
 
-    public class Location : NamedEntity, IAddable, IDeletable
+    public class Location : NamedEntity, IAddable, IDeletable, IAuditable
     {
         public virtual LatLng LatLng { get; set; }
         public virtual List<Venue> Venues { get; set; }
 
         public virtual List<Photo> Photos { get; set; }
         public bool IsDeleted { get; set; }
+        public virtual Country Country { get; set; }
     }
 
-    public class Venue : NamedEntity, IAddable, IDeletable
+    public class Venue : NamedEntity, IAddable, IDeletable, IAuditable
     {
         public virtual LatLng LatLng { get; set; }
         public string Address { get; set; }
@@ -62,6 +63,10 @@ namespace CosStay.Model
 
         public virtual List<Photo> Photos { get; set; }
         public bool IsDeleted { get; set; }
+
+        public string FacebookId { get; set; }
+
+        public virtual List<EventInstance> EventInstances { get; set; }
 
     }
 
@@ -80,13 +85,13 @@ namespace CosStay.Model
         public double? Lng { get; private set; }
     }
 
-    public class Country : NamedEntity
+    public class Country : NamedEntity, IAuditable
     {
         public virtual List<Location> Locations { get; set; }
         public string ShortName { get; set; }
     }
 
-    public class User : IUser<string>, IAddable,IDeletable
+    public class User : IUser<string>, IAddable, IDeletable, IAuditable
     {
         public string Name { get; set; }
         public virtual Location Location { get; set; }
@@ -177,7 +182,7 @@ namespace CosStay.Model
     //
     // Type parameters:
     //   TKey:
-    public class IdentityUserLogin
+    public class IdentityUserLogin: IAuditable
     {
         public IdentityUserLogin()
         {
@@ -202,7 +207,7 @@ namespace CosStay.Model
     //
     // Type parameters:
     //   TKey:
-    public class IdentityUserRole
+    public class IdentityUserRole:IAuditable
     {
         public IdentityUserRole()
         {
@@ -296,20 +301,23 @@ namespace CosStay.Model
         public string UserAgent { get; set; }
         public DateTimeOffset EventDate { get; set; }
         public string AuditEvent { get; set; }
+        public string ObjectType { get; set; }
         public string Data { get; set; }
     }
 
-    public class ContactMethod : IEntity, IAddable, IDestoyable
+    public class ContactMethod : IEntity, IAddable, IDestoyable, IAuditable
     {
         public int Id { get; set; }
         public string Value { get; set; }
         [Display(Name = "Date Added", ShortName = "Added")]
         public DateTimeOffset DateAdded { get; set; }
         public int Order { get; set; }
+        public virtual User User { get; set; }
     }
 
-    public class AccomodationVenue : NamedEntity, IAddable, IDeletable
+    public class AccomodationVenue : NamedEntity, IAddable, IDeletable, IOwnable, IAuditable
     {
+        public string Description { get; set; }
         public virtual LatLng LatLng { get; set; }
         public string Address { get; set; }
         public virtual Location Location { get; set; }
@@ -330,8 +338,10 @@ namespace CosStay.Model
     }
 
 
-    public class AccomodationRoom : NamedEntity, IAddable, IDeletable
+    public class AccomodationRoom : NamedEntity, IAddable, IDeletable, IAuditable
     {
+        public string Description { get; set; }
+        public virtual AccomodationVenue Venue { get; set; }
         public virtual List<Bed> Beds { get; set; }
 
         public virtual List<AccomodationRoomFeature> Features { get; set; }
@@ -343,19 +353,19 @@ namespace CosStay.Model
         public bool IsDeleted { get; set; }
     }
 
-    public class BookingRequest : IEntity, IAddable, IDeletable
+    public class BookingRequest : IEntity, IAddable, IDeletable, IAuditable
     {
+        public string Notes { get; set; }
         public int Id { get; set; }
         public virtual Bed Bed { get; set; }
         public virtual User User { get; set; }
         public int Guests { get; set; }
         
-
         public virtual BookingStatus Status { get; set; }
         public bool IsDeleted { get; set; }
     }
 
-    public class AccomodationBedAvailabilityNight : IEntity, IAddable, IDeletable
+    public class AccomodationBedAvailabilityNight : IEntity, IAddable, IDeletable, IAuditable
     {
         public int Id { get; set; }
         public virtual Bed Bed { get; set; }
@@ -386,7 +396,7 @@ namespace CosStay.Model
         Booked
     }
 
-    public class UserEventAttendance : IEntity, IAddable, IDeletable
+    public class UserEventAttendance : IEntity, IAddable, IDeletable, IAuditable
     {
         public int Id { get; set; }
         public virtual User User { get; set; }
@@ -397,7 +407,7 @@ namespace CosStay.Model
         public bool IsDeleted { get; set; }
     }
 
-    public class Photo:IDeletable
+    public class Photo : IDeletable, IOwnable, IAuditable
     {
         public Guid PhotoId { get; set; }
         public string Caption { get; set; }
@@ -408,11 +418,12 @@ namespace CosStay.Model
         public bool IsDeleted { get; set; }
     }
 
-    public class Bed:IEntity,IAddable,IDeletable
+    public class Bed : IEntity, IAddable, IDeletable, IAuditable
     {
         public int Id { get; set; }
         public virtual BedSize BedSize { get; set; }
         public virtual BedType BedType { get; set; }
+        public virtual AccomodationRoom Room { get; set; }
 
         [Display(Name = "Date Added", ShortName = "Added")]
         public DateTimeOffset DateAdded { get; set; }
@@ -440,12 +451,12 @@ namespace CosStay.Model
     {
     }
 
-    public class AccomodationVenueFeature : NamedEntity,IAddable,IDeletable
+    public class AccomodationVenueFeature : NamedEntity, IAddable, IDeletable, IAuditable
     {
         public bool IsDeleted { get; set; }
     }
 
-    public class AccomodationRoomFeature : NamedEntity,IAddable,IDeletable
+    public class AccomodationRoomFeature : NamedEntity, IAddable, IDeletable, IAuditable
     {
         public bool IsDeleted { get; set; }
     }

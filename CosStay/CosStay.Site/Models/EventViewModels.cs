@@ -29,5 +29,7 @@ namespace CosStay.Site.Models
 
         public string CurrentUserRsvpStatus { get; set; }
         public bool CurrentUserAttending { get; set; }
+
+        public string FriendsAttending { get; set; }
     }
 }

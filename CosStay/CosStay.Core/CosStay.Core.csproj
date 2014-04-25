@@ -38,6 +38,7 @@
     </Reference>
     <Reference Include="EntityFramework.SqlServer">
       <HintPath>..\packages\EntityFramework.6.1.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Facebook">
       <HintPath>..\packages\Facebook.6.4.2\lib\net45\Facebook.dll</HintPath>
@@ -60,7 +61,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsyncInline.cs" />
     <Compile Include="Services\IAccomodationVenueService.cs" />
+    <Compile Include="Services\IAuthorizationService.cs" />
     <Compile Include="Services\IEntityStore.cs" />
     <Compile Include="Services\Impl\AccomodationVenueService.cs" />
     <Compile Include="Services\Impl\AppFacebookService.cs" />
@@ -68,12 +71,17 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\IAppFacebookService.cs" />
     <Compile Include="Services\IDateTimeService.cs" />
+    <Compile Include="Services\Impl\AuthorizationService.cs" />
     <Compile Include="Services\Impl\DateTimeService.cs" />
     <Compile Include="Services\Impl\EntityStore.cs" />
     <Compile Include="Services\Impl\FacebookCredentials.cs" />
     <Compile Include="Services\Impl\FacebookServiceBase.cs" />
+    <Compile Include="Services\ILocationService.cs" />
+    <Compile Include="Services\IVenueService.cs" />
+    <Compile Include="Services\Impl\LocationService.cs" />
     <Compile Include="Services\Impl\UserFacebookService.cs" />
     <Compile Include="Services\Impl\UserService.cs" />
+    <Compile Include="Services\Impl\VenueService.cs" />
     <Compile Include="Services\IUserFacebookService.cs" />
     <Compile Include="Services\IUserService.cs" />
     <Compile Include="Services\UserStore.cs" />

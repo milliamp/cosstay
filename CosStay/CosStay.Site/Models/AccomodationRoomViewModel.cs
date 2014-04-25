@@ -6,12 +6,7 @@ using System.Text;
 
 namespace CosStay.Site.Models
 {
-    public class AccomodationRoomViewModel
-    {
-        public AccomodationRoomViewModel()
-        {
-
-        }
+    public class AccomodationRoomViewModel {
         /*public AccomodationRoomViewModel(AccomodationRoom room)
         {
             AccomodationRoomId = room.AccomodationRoomId;

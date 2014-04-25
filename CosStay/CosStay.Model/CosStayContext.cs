@@ -3,7 +3,11 @@ using Microsoft.AspNet.Identity.EntityFramework;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.Common;
 using System.Data.Entity;
+using System.Data.Entity.Core;
+using System.Data.Entity.Core.Metadata.Edm;
+using System.Data.Entity.Core.Objects;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Infrastructure.Annotations;
 using System.Data.Entity.ModelConfiguration;
@@ -11,6 +15,7 @@ using System.Data.Entity.ModelConfiguration.Configuration;
 using System.Data.Entity.Validation;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,6 +29,206 @@ namespace CosStay.Model
 
             //Database.SetInitializer(new MigrateDatabaseToLatestVersion<CosStayContext, Configuration>()); 
             //Database.SetInitializer(new DropCreateDatabaseAlways<CosStayContext>());
+
+
+            var objectContext = ((IObjectContextAdapter)this).ObjectContext;
+            var mdw = objectContext.MetadataWorkspace;
+            var items = mdw.GetItems<EntityType>(DataSpace.CSpace);
+
+            foreach (var entity in items)
+            {
+                //var entity = items.First(e => e.FullName == entityType.FullName);
+
+                var entitySetName = objectContext.DefaultContainerName + "." + entity.Name;
+                var keyNames = entity.KeyMembers.Select(k => k.Name);
+
+                var prop = Type.GetType(entity.FullName); // entity.GetProperty(keyName);
+
+                _entityKeyProperties.Add(prop, new EntityKeyInfo() { EntitySetName = entitySetName, PropertyInfo = prop.GetProperties().Where(p => keyNames.Contains(p.Name)).ToArray() });
+            }
+        }
+
+        private Dictionary<Type, EntityKeyInfo> _entityKeyProperties = new Dictionary<Type, EntityKeyInfo>();
+
+        private class EntityKeyInfo
+        {
+            public string EntitySetName { get; set; }
+            public PropertyInfo[] PropertyInfo { get; set; }
+        }
+
+        public override int SaveChanges()
+        {
+            return SaveChanges(new Request()
+            {
+                Date = DateTimeOffset.Now
+            });
+            //throw new NotImplementedException("Must provide a 'request' object");
+        }
+
+        public override async Task<int> SaveChangesAsync()
+        {
+            return await base.SaveChangesAsync();
+        }
+
+        public override async Task<int> SaveChangesAsync(System.Threading.CancellationToken cancellationToken)
+        {
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+
+        public PropertyInfo KeyForEntity(Type entityType)
+        {
+            return _entityKeyProperties[entityType].PropertyInfo.First();
+        }
+
+        public int SaveChanges(Request request)
+        {
+            return SaveChangesAsync(request).Result;
+        }
+
+        public async Task<int> SaveChangesAsync(Request request)
+        {
+            var oca = this as IObjectContextAdapter;
+            var oc = oca.ObjectContext;
+            oc.DetectChanges();
+            var entries = oc.ObjectStateManager.GetObjectStateEntries(EntityState.Added | EntityState.Modified | EntityState.Unchanged).Where(e => !e.IsRelationship);
+
+            // Save these for after we get PK
+            var addedEntities = entries.Where(a => a.State == EntityState.Added).ToArray();
+            var modifiedEntities = entries.Where(a => a.State == EntityState.Modified).ToList();
+            var deletedEntites = entries.Where(a => a.State == EntityState.Deleted).ToList();
+
+            var ose = oc.ObjectStateManager.GetObjectStateEntries(EntityState.Added).Where(e => e.IsRelationship);
+
+            var relations = new Dictionary<ObjectStateEntry, List<ObjectStateEntry>>();
+
+            foreach (var entry in ose)
+            {
+                var leftKey = entry.CurrentValues.GetValue(0) as EntityKey;
+                var rightKey = entry.CurrentValues.GetValue(1) as EntityKey;
+
+                //var entityType = entry.Entity.GetType();
+                //var keyInfo = _entityKeyProperties[entityType];
+
+                var matchingEntry = entries.FirstOrDefault(e => e.EntityKey.Equals(leftKey));
+                var rightHandEntry = entries.FirstOrDefault(e => e.EntityKey.Equals(rightKey));
+
+                if (matchingEntry == null)
+                {
+                    //explode
+                    throw new InvalidOperationException("Can't find entry");
+                }
+                if (!relations.Keys.Contains(matchingEntry))
+                    relations.Add(matchingEntry, new List<ObjectStateEntry>(1));
+                var relationList = relations[matchingEntry];
+                relationList.Add(rightHandEntry);
+
+                if (!leftKey.IsTemporary && !modifiedEntities.Contains(entry))
+                    modifiedEntities.Add(matchingEntry);
+
+            }
+
+            foreach (var entry in modifiedEntities)
+            {
+                var audit = CreateAudit(request, entry, EntityState.Modified, relations.ContainsKey(entry) ? relations[entry] : new List<ObjectStateEntry>());
+
+                Audits.Add(audit);
+            }
+
+            var firstSave = await base.SaveChangesAsync();
+
+            foreach (var entry in addedEntities)
+            {
+                var audit = CreateAudit(request, entry, EntityState.Added, relations.ContainsKey(entry) ? relations[entry] : new List<ObjectStateEntry>());
+                Audits.Add(audit);
+
+            }
+
+            var secondSave = await base.SaveChangesAsync();
+            return firstSave + secondSave;
+        }
+
+        private Audit CreateAudit(Request request, ObjectStateEntry entry, EntityState state, IEnumerable<ObjectStateEntry> relatedEntities)
+        {
+            string objectTypeName = "";
+            string data = "";
+            try
+            {
+                DbDataRecord original = null;
+                if (state != EntityState.Added)
+                    original = entry.OriginalValues;
+                var properties = ChangedProperties(state, entry.OriginalValues, entry.CurrentValues, relatedEntities);
+
+                foreach (var relatedEntity in relatedEntities)
+                {
+                    var propertyList = entry.Entity.GetType().GetProperties();
+                    // Random Guess based on type
+                    var namedProperty = propertyList.FirstOrDefault(pi => pi.PropertyType == relatedEntity.Entity.GetType() || pi.PropertyType.GenericTypeArguments.Any(gta => gta == relatedEntity.Entity.GetType()));
+                    properties.Add(namedProperty.Name, relatedEntity.EntityKey.EntityKeyValues != null ? relatedEntity.EntityKey.EntityKeyValues[0].Value.ToString() : "New Entry");
+                }
+
+                var objectType = entry.Entity.GetType();
+                while (!objectType.Namespace.Contains("CosStay.Model") && objectType.BaseType != null)
+                    objectType = objectType.BaseType;
+
+                objectTypeName = objectType.Name;
+
+                data = Newtonsoft.Json.JsonConvert.SerializeObject(properties);
+            }
+            catch (Exception e)
+            {
+                if (string.IsNullOrWhiteSpace(data))
+                    data = "Failed to create Audit - " + e.Message;
+            }
+
+            var audit = new Audit()
+            {
+                AuditEvent = Enum.GetName(typeof(EntityState), state),
+                EventDate = request.Date,
+                InitiatingUser = Users.SingleOrDefault(u => u.Id == request.UserId),
+                IP = request.IP,
+                UserAgent = request.UserAgent,
+                ObjectType = objectTypeName,
+                Data = data
+            };
+
+            return audit;
+        }
+
+        private Dictionary<string, object> ChangedProperties(EntityState state, DbDataRecord original, DbDataRecord current, IEnumerable<ObjectStateEntry> relatedEntities)
+        {
+
+            var properties = new Dictionary<string, object>();
+            //foreach (var p in current.PropertyNames)
+            for (var i = 0; i < original.FieldCount; i++)
+            {
+                var oldValue = original.GetValue(i);
+                var newValue = current.GetValue(i);
+                //ObjectStateEntryDbDataRecord
+                if (oldValue is DbDataRecord && newValue is DbDataRecord)
+                {
+                    var complexTypeChangedValues = ChangedProperties(state, (DbDataRecord)oldValue, (DbDataRecord)newValue, new List<ObjectStateEntry>());
+                    if (complexTypeChangedValues.Count > 0)
+                        properties.Add(original.GetName(i), complexTypeChangedValues);
+                    continue;
+                }
+                if (ValuesHaveChanged(oldValue, newValue) || state == EntityState.Added || original.GetName(i) == "Id")
+                    properties.Add(original.GetName(i), newValue);
+            }
+
+
+            return properties;
+        }
+
+        private bool ValuesHaveChanged(object oldValue, object newValue)
+        {
+            if (oldValue == null && newValue == null)
+                return false;
+            if (oldValue == null && newValue != null)
+                return true;
+            if (oldValue != null && newValue == null)
+                return true;
+
+            return !oldValue.Equals(newValue);
         }
 
         public DbSet<Event> Events { get; set; }
@@ -109,7 +314,7 @@ namespace CosStay.Model
             StringPropertyConfiguration arg_563_0 = entityTypeConfiguration2.Property((IdentityRole r) => r.Name).IsRequired().HasMaxLength(new int?(256));
             string arg_563_1 = "Index";
             IndexAttribute indexAttribute2 = new IndexAttribute("RoleNameIndex");
-            indexAttribute2.IsUnique =true;
+            indexAttribute2.IsUnique = true;
             arg_563_0.HasColumnAnnotation(arg_563_1, new IndexAnnotation(indexAttribute2));
             entityTypeConfiguration2.HasMany<IdentityUserRole>((IdentityRole r) => r.Users).WithRequired().HasForeignKey<string>((IdentityUserRole ur) => ur.RoleId);
         }

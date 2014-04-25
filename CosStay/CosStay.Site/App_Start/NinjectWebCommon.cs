@@ -13,6 +13,11 @@ namespace CosStay.Site.App_Start
     using CosStay.Core.Services;
     using CosStay.Core.Services.Impl;
     using System.Configuration;
+    using CosStay.Model;
+using Ninject.Activation;
+    using System.Security.Claims;
+    using Microsoft.AspNet.Identity;
+    using System.Web.Mvc.Async;
 
     public static class NinjectWebCommon 
     {
@@ -78,9 +83,31 @@ namespace CosStay.Site.App_Start
             
             kernel.Bind<IDateTimeService>().To<DateTimeService>().InSingletonScope();
             kernel.Bind<IAccomodationVenueService>().To<AccomodationVenueService>().InRequestScope();
-            kernel.Bind<IEntityStore>().To<EntityStore>().InRequestScope();
-            kernel.Bind<IUserService>().To<UserService>().InRequestScope();
-            
-        }        
+            kernel.Bind<IEntityStore>().To<EntityStore>().InRequestScope()
+                .WithConstructorArgument("request", CurrentRequest);
+            kernel.Bind<IUserService>().To<UserService>().InRequestScope()
+                .WithConstructorArgument("principal", ctx => HttpContext.Current.GetOwinContext().Authentication.User);
+            kernel.Bind<IAuthorizationService>().To<AuthorizationService>().InRequestScope();
+            kernel.Bind<ILocationService>().To<LocationService>().InRequestScope();
+            kernel.Bind<IVenueService>().To<VenueService>().InRequestScope();
+        }
+
+        static object CurrentRequest(IContext context)
+        {
+            var user = HttpContext.Current.GetOwinContext().Authentication.User.Identity as ClaimsIdentity;
+            string userId = "";
+            if (user != null)
+                userId = user.GetUserId();
+
+            return new CosStay.Model.Request()
+            {
+                Date = DateTimeOffset.Now,
+                IP = HttpContext.Current.Request.UserHostAddress,
+                UserAgent = HttpContext.Current.Request.UserAgent,
+                UserId = userId
+            };
+        }
+
     }
+
 }

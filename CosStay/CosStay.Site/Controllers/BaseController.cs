@@ -1,5 +1,6 @@
 ﻿using CosStay.Core.Services;
 using CosStay.Model;
+using CosStay.Site.Models;
 using Facebook;
 using Microsoft.AspNet.Identity;
 using System;
@@ -16,16 +17,20 @@ namespace CosStay.Site.Controllers
     public abstract class BaseController : Controller
     {
         protected IEntityStore _es;
-        protected BaseController(IEntityStore entityStore)
+        protected IAuthorizationService _auth;
+        protected BaseController(IEntityStore entityStore, IAuthorizationService authorizationService)
         {
             _es = entityStore;
+            _auth = authorizationService;
         }
+
         protected override void Initialize(System.Web.Routing.RequestContext requestContext)
         {
             base.Initialize(requestContext);
-            if (Request.IsAuthenticated && CurrentUser == null)
-                HttpContext.GetOwinContext().Authentication.SignOut();
+            /*if (Request.IsAuthenticated && await GetCurrentUserAsync() == null)
+                HttpContext.GetOwinContext().Authentication.SignOut();*/
         }
+
         public ClaimsIdentity Identity
         {
             get
@@ -34,30 +39,47 @@ namespace CosStay.Site.Controllers
             }
         }
 
-        private User _currentUser = null;
-        public User CurrentUser
+        public async Task SetSharedViewParameters()
         {
-            get
+            try
             {
-                if (!Request.IsAuthenticated)
-                {
-                    _currentUser = null;
-                    return null;
-                }
-                
-                if (_currentUser != null)
-                    return _currentUser;
-
-                    _currentUser = _es.Get<User>(Identity.GetUserId());
-                    return _currentUser;
-                
+                var user = await GetCurrentUserAsync();
+                ViewBag.CurrentUserName = user.Name;
+                ViewBag.CurrentUserEmail = user.Email;
             }
-
+            catch {
+                if (HttpContext.Request.IsAuthenticated)
+                    HttpContext.GetOwinContext().Authentication.SignOut();
+                // Swallow
+            }
         }
 
-        protected T ValidateDetails<T>(IEntityStore es, int id, string name) where T : NamedEntity
+        protected override void OnActionExecuted(ActionExecutedContext filterContext)
         {
-            var instance = es.Get<T>(id);
+            AsyncInline.Run(async () => await SetSharedViewParameters());
+            base.OnActionExecuted(filterContext);
+        }
+
+        private User _currentUser = null;
+        public async Task<User> GetCurrentUserAsync()
+        {
+            if (!Request.IsAuthenticated)
+            {
+                _currentUser = null;
+                return null;
+            }
+                
+            if (_currentUser != null)
+                return _currentUser;
+
+            _currentUser = await _es.GetAsync<User>(Identity.GetUserId());
+                return _currentUser;
+            
+        }
+
+        protected async Task<T> ValidateDetailsAsync<T>(IEntityStore es, int id, string name) where T : NamedEntity
+        {
+            var instance = await _es.GetAsync<T>(id);
             if (instance == null)
                 throw new HttpException(404, id + " not found");
 
@@ -71,6 +93,20 @@ namespace CosStay.Site.Controllers
                 });
 
             return instance;
+        }
+
+
+        protected async Task DenyIfNotAuthorizedAsync<TEntity>(ActionType actionType) where TEntity : IEntity
+        {
+            
+            if (!_auth.IsAuthorizedTo<TEntity>(await GetCurrentUserAsync(), actionType, default(TEntity)))
+                throw new HttpException(403, "Access Denied");
+        }
+
+        protected async Task DenyIfNotAuthorizedAsync<TEntity>(ActionType actionType, TEntity entity) where TEntity : IEntity
+        {
+            if (!_auth.IsAuthorizedTo(await GetCurrentUserAsync(), actionType, entity))
+                throw new HttpException(403, "Access Denied");
         }
 
         public string SafeUri(string toSanitise)

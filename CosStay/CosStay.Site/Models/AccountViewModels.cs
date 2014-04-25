@@ -11,7 +11,6 @@ namespace CosStay.Site.Models
 
     public class UserPropertiesViewModel
     {
-
         [Required]
         [Display(Name = "Name")]
         [RegularExpression(@"^[a-zA-Z\s]*$", ErrorMessage = "Name must be alpha characters only.")]
@@ -27,8 +26,7 @@ namespace CosStay.Site.Models
     }
 
 
-    public class ManageUserViewModel
-    {
+    public class ManageUserViewModel{
         [Required]
         [DataType(DataType.Password)]
         [Display(Name = "Current password")]
@@ -46,8 +44,7 @@ namespace CosStay.Site.Models
         public string ConfirmPassword { get; set; }
     }
 
-    public class LoginViewModel
-    {
+    public class LoginViewModel {
         [Required]
         [Display(Name = "User name")]
         public string UserName { get; set; }
@@ -61,8 +58,7 @@ namespace CosStay.Site.Models
         public bool RememberMe { get; set; }
     }
 
-    public class RegisterViewModel
-    {
+    public class RegisterViewModel {
         [Required]
         [Display(Name = "User name")]
         public string UserName { get; set; }

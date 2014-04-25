@@ -82,6 +82,6 @@
         <div id="map-canvas" style="height: 400px;" class="col-md-6"></div>
     </div>
 <p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+    @Html.TrimmedActionLink("Edit", "Edit", Model, new { id = Model.Id }) |
     @Html.ActionLink("Back to List", "Index")
 </p>

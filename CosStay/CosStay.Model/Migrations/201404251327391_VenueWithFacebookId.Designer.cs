@@ -7,13 +7,13 @@ namespace CosStay.Model.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.1.0-30225")]
-    public sealed partial class Initial : IMigrationMetadata
+    public sealed partial class VenueWithFacebookId : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(Initial));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(VenueWithFacebookId));
         
         string IMigrationMetadata.Id
         {
-            get { return "201404130228334_Initial"; }
+            get { return "201404251327391_VenueWithFacebookId"; }
         }
         
         string IMigrationMetadata.Source

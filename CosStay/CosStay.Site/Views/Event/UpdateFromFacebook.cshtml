@@ -1,0 +1,88 @@
+﻿@model CosStay.Site.Models.EventInstanceUpdateStatusViewModel
+
+@{
+    ViewBag.Title = "UpdateFromFacebook";
+}
+
+<h2>Update From Facebook</h2>
+
+<div>
+    <h4>EventInstanceUpdateStatusViewModel</h4>
+	<hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.LastUpdated_Database)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.LastUpdated_Database)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.LastUpdated_Facebook)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.LastUpdated_Facebook)
+        </dd>
+
+    </dl>
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>Current</th>
+                <th>Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>Name</th>
+                <td>@Html.DisplayFor(model => model.Event_Database.Name)</td>
+                <td>@Html.DisplayFor(model => model.Event_Facebook.Name)</td>
+            </tr>
+            <tr>
+                <th>URL</th>
+                <td>@Html.DisplayFor(model => model.Event_Database.Url)</td>
+                <td>@Html.DisplayFor(model => model.Event_Facebook.Url)</td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td>@Html.DisplayFor(model => model.Event_Database.Description)</td>
+                <td>@Html.DisplayFor(model => model.Event_Facebook.Description)</td>
+            </tr>
+            <tr>
+                <th>Venue Name</th>
+                <td>@Html.DisplayFor(model => model.Event_Database.VenueName)</td>
+                <td>@Html.DisplayFor(model => model.Event_Facebook.VenueName)</td>
+            </tr>
+            <tr>
+                <th>Venue LatLng</th>
+                <td>@Html.DisplayFor(model => model.Event_Database.VenueLatLng)</td>
+                <td>@Html.DisplayFor(model => model.Event_Facebook.VenueLatLng)</td>
+            </tr>
+            <tr>
+                <th>Address</th>
+                <td>@Html.DisplayFor(model => model.Event_Database.Address)</td>
+                <td>@Html.DisplayFor(model => model.Event_Facebook.Address)</td>
+            </tr>
+            <tr>
+                <th>Location</th>
+                <td>@Html.DisplayFor(model => model.Event_Database.Location)</td>
+                <td>@Html.DisplayFor(model => model.Event_Facebook.Location)</td>
+            </tr>
+            <tr>
+                <th>Start</th>
+                <td>@Html.DisplayFor(model => model.Event_Database.StartDate)</td>
+                <td>@Html.DisplayFor(model => model.Event_Facebook.StartDate)</td>
+            </tr>
+            <tr>
+                <th>End</th>
+                <td>@Html.DisplayFor(model => model.Event_Database.EndDate)</td>
+                <td>@Html.DisplayFor(model => model.Event_Facebook.EndDate)</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>
+    @Html.ActionLink("Back to List", "Index")
+</p>

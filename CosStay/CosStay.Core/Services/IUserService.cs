@@ -11,5 +11,6 @@ namespace CosStay.Core.Services
     public interface IUserService
     {
         UserManager<User> UserManager { get; }
+        User CurrentUser { get; }
     }
 }

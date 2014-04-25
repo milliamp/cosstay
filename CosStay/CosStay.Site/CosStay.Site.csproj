@@ -16,7 +16,8 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
-    <IISExpressSSLPort>44304</IISExpressSSLPort>
+    <IISExpressSSLPort>
+    </IISExpressSSLPort>
     <IISExpressAnonymousAuthentication>enabled</IISExpressAnonymousAuthentication>
     <IISExpressWindowsAuthentication>disabled</IISExpressWindowsAuthentication>
     <IISExpressUseClassicPipelineMode>false</IISExpressUseClassicPipelineMode>
@@ -198,7 +199,10 @@
     <Compile Include="Models\AccomodationRoomViewModel.cs" />
     <Compile Include="Models\AccomodationVenueViewModel.cs" />
     <Compile Include="Models\BedViewModel.cs" />
+    <Compile Include="Models\EventInstanceUpdateStatusViewModel.cs" />
     <Compile Include="Models\UserViewModel.cs" />
+    <Compile Include="Utilities\ActionTypeAttribute.cs" />
+    <Compile Include="Utilities\AsyncInline.cs" />
     <Compile Include="Utilities\CmsUrlConstraint.cs" />
     <Compile Include="Controllers\AccomodationVenueController.cs" />
     <Compile Include="Controllers\AccountController.cs" />
@@ -216,6 +220,8 @@
     <Compile Include="Utilities\JsonNetResult.cs" />
     <Compile Include="Utilities\LoginActionParameters.cs" />
     <Compile Include="Startup.cs" />
+    <Compile Include="Utilities\Security.cs" />
+    <Compile Include="Utilities\SecurityTrimLinkExtensions.cs" />
     <Compile Include="Utilities\ValidateJsonAntiForgeryTokenAttribute.cs" />
     <Compile Include="Utility.cs" />
   </ItemGroup>
@@ -290,6 +296,8 @@
     <None Include="Scripts\jquery-2.1.0.intellisense.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="Scripts\clndr.min.js" />
+    <Content Include="Scripts\cosstay.js" />
     <Content Include="Scripts\cosstay.viewmodels.js" />
     <Content Include="Scripts\jquery-2.1.0.js" />
     <Content Include="Scripts\jquery-2.1.0.min.js" />
@@ -304,6 +312,10 @@
     <Content Include="Scripts\knockout.mapping-latest.debug.js" />
     <Content Include="Scripts\knockout.mapping-latest.js" />
     <Content Include="Scripts\modernizr-2.7.2.js" />
+    <Content Include="Scripts\moment-with-langs.js" />
+    <Content Include="Scripts\moment-with-langs.min.js" />
+    <Content Include="Scripts\moment.js" />
+    <Content Include="Scripts\moment.min.js" />
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.matchmedia.addListener.js" />
     <Content Include="Scripts\respond.matchmedia.addListener.min.js" />
@@ -345,6 +357,8 @@
     <Content Include="Views\Account\_UserPropertiesListPartial.cshtml" />
     <Content Include="Views\Event\Edit.cshtml" />
     <Content Include="Views\Event\Create.cshtml" />
+    <Content Include="Views\Page\Edit.cshtml" />
+    <Content Include="Views\Event\UpdateFromFacebook.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

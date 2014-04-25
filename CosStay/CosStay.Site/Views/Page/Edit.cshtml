@@ -1,0 +1,9 @@
+﻿@model CosStay.Site.Models.ContentPageViewModel
+
+@{
+    ViewBag.Title = "Content";
+}
+
+<h2>Edit - @Model.Title</h2>
+
+@Html.Raw(Model.HtmlContent)

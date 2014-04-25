@@ -39,6 +39,7 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\EntityFramework.6.1.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -47,6 +48,9 @@
     <Reference Include="Microsoft.AspNet.Identity.EntityFramework, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.AspNet.Identity.EntityFramework.2.0.0\lib\net45\Microsoft.AspNet.Identity.EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -64,27 +68,23 @@
     <Compile Include="CosStayModel.cs" />
     <Compile Include="CosStaySecurityModel.cs" />
     <Compile Include="IAddable.cs" />
+    <Compile Include="IAuditable.cs" />
     <Compile Include="IDeletable.cs" />
     <Compile Include="IDestoyable.cs" />
     <Compile Include="IEntity.cs" />
-    <Compile Include="Migrations\201404130228334_Initial.cs" />
-    <Compile Include="Migrations\201404130228334_Initial.Designer.cs">
-      <DependentUpon>201404130228334_Initial.cs</DependentUpon>
+    <Compile Include="IOwnable.cs" />
+    <Compile Include="Migrations\201404250726239_Initial.cs" />
+    <Compile Include="Migrations\201404250726239_Initial.Designer.cs">
+      <DependentUpon>201404250726239_Initial.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201404131132523_NamedRooms.cs" />
-    <Compile Include="Migrations\201404131132523_NamedRooms.Designer.cs">
-      <DependentUpon>201404131132523_NamedRooms.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201404131206464_Deletables.cs" />
-    <Compile Include="Migrations\201404131206464_Deletables.Designer.cs">
-      <DependentUpon>201404131206464_Deletables.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201404182301210_Test.cs" />
-    <Compile Include="Migrations\201404182301210_Test.Designer.cs">
-      <DependentUpon>201404182301210_Test.cs</DependentUpon>
+    <Compile Include="Migrations\201404251327391_VenueWithFacebookId.cs" />
+    <Compile Include="Migrations\201404251327391_VenueWithFacebookId.Designer.cs">
+      <DependentUpon>201404251327391_VenueWithFacebookId.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="MissingDllHack.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueryableExtensions.cs" />
     <Compile Include="Utilities.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -95,17 +95,11 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201404130228334_Initial.resx">
-      <DependentUpon>201404130228334_Initial.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201404250726239_Initial.resx">
+      <DependentUpon>201404250726239_Initial.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201404131132523_NamedRooms.resx">
-      <DependentUpon>201404131132523_NamedRooms.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201404131206464_Deletables.resx">
-      <DependentUpon>201404131206464_Deletables.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201404182301210_Test.resx">
-      <DependentUpon>201404182301210_Test.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201404251327391_VenueWithFacebookId.resx">
+      <DependentUpon>201404251327391_VenueWithFacebookId.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

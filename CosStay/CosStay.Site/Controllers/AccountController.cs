@@ -19,8 +19,8 @@ namespace CosPlay.Site.Controllers
     [Authorize]
     public class AccountController : BaseController
     {
-        public AccountController(IEntityStore entityStore, IUserService userService)
-            :base(entityStore)
+        public AccountController(IEntityStore entityStore, IUserService userService, IAuthorizationService authorizationService)
+            :base(entityStore, authorizationService)
         {
             _userService = userService;
         }
@@ -275,7 +275,7 @@ namespace CosPlay.Site.Controllers
                 {
                     return View("ExternalLoginFailure");
                 }
-                var user = new User() { UserName = model.UserName };
+                var user = new User() { Id = Guid.NewGuid().ToString(), UserName = model.UserName };
                 var result = await UserManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
@@ -335,9 +335,8 @@ namespace CosPlay.Site.Controllers
                     Trace.TraceError("Error occurred while updating user properties : {0}", ex.ToString());
                 }
             }
-
-            return View(model);
-
+            //TODO: Something here
+            return RedirectToAction("Manage", new { Message = "No" });
         }
 
 

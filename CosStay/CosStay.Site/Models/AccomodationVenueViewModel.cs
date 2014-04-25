@@ -6,11 +6,7 @@ using System.Web;
 
 namespace CosStay.Site.Models
 {
-    public class AccomodationVenueViewModel
-    {
-        public AccomodationVenueViewModel()
-        {
-        }
+    public class AccomodationVenueViewModel {
         /*
         public AccomodationVenueViewModel(AccomodationVenue venue)
         {

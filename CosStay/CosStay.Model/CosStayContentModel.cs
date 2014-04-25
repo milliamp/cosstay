@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace CosStay.Model
 {
-    public class ContentPage
+    public class ContentPage:IEntity
     {
-        public int ContentPageId { get; set; }
+        public int Id { get; set; }
         public string Uri  {get; set;}
         public virtual List<ContentPageVersion> Versions { get; set; }
     }
 
-    public class ContentPageVersion
+    public class ContentPageVersion:IEntity
     {
-        public int ContentPageVersionId { get; set; }
+        public int Id { get; set; }
         public int Version { get; set; }
         public virtual ContentPage Page { get; set; }
 

@@ -50,4 +50,12 @@ namespace CosStay.Model
         public virtual List<RolePermission> Permissions { get; set; }
         public virtual List<User> Users { get; set; }
     }
+
+    public class Request
+    {
+        public DateTimeOffset Date { get; set; }
+        public string UserId { get; set; }
+        public string IP { get; set; }
+        public string UserAgent { get; set; }
+    }
 }

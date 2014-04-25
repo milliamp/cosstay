@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace CosStay.Site.Utilities
+namespace CosStay.Site
 {
     public class LoginActionParameters
     {

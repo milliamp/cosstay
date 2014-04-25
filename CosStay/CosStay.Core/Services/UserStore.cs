@@ -18,7 +18,7 @@ namespace CosStay.Core.Services
         /// <summary>
         ///     Context for the store
         /// </summary>
-        public DbContext Context
+        public CosStayContext Context
         {
             get;
             private set;
@@ -704,7 +704,8 @@ namespace CosStay.Core.Services
         {
             if (this.AutoSaveChanges)
             {
-                await this.Context.SaveChangesAsync().ConfigureAwait(false);
+                await _es.SaveAsync();
+                //await this.Context.SaveChangesAsync().ConfigureAwait(false);
             }
         }
         private Task<User> GetUserAggregateAsync(Expression<Func<User, bool>> filter)

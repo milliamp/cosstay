@@ -2,9 +2,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.Entity;
+using System.Data.Entity.Core;
+using System.Data.Entity.Core.Metadata.Edm;
+using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Validation;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,19 +18,112 @@ namespace CosStay.Core.Services.Impl
     public class EntityStore:IEntityStore,IDisposable
     {
         private CosStayContext _db;
-        public EntityStore()
+        private Request _request;
+        public EntityStore(Request request)
         {
             _db = new CosStayContext();
+            _request = request;
         }
         public IQueryable<TEntity> Query<TEntity>() where TEntity : class
         {
             throw new NotImplementedException();
         }
 
-        public TEntity Get<TEntity>(object pk) where TEntity : class
+        
+        public async Task<TEntity> GetAsync<TEntity>(object pk) where TEntity : class
         {
-            return _db.Set<TEntity>().Find(pk);
+            var query = GetByKeyExpression<TEntity, object>(pk);
+            return await query.SingleOrDefaultAsync();
         }
+
+        public async Task<TEntity> GetAsync<TEntity,TProperty>(object pk, params Expression<Func<TEntity, TProperty>>[] paths) where TEntity : class
+        {
+            var query = GetByKeyExpression<TEntity, TProperty>(pk, paths);
+            return await query.SingleOrDefaultAsync();
+        }
+
+        /*public TEntity Get<TEntity>(object pk) where TEntity : class
+        {
+            var query = GetByKeyExpression<TEntity, object>(pk);
+            return query.SingleOrDefault();
+        }*/
+
+        /*
+        public TEntity> GetAsync<TEntity, TProperty>(object pk, params Expression<Func<TEntity, TProperty>>[] paths) where TEntity : class
+        {
+            var query = GetByKeyExpression<TEntity, object>(pk);
+            return query.SingleOrDefault();
+        }*/
+
+        protected IQueryable<TEntity> GetByKeyExpression<TEntity,TProperty>(object key, params Expression<Func<TEntity, TProperty>>[] paths) where TEntity : class
+        {
+            var checkType = typeof(TEntity);
+            var set = _db.Set<TEntity>();
+            IQueryable<TEntity> query = set;
+            foreach (var path in paths)
+            {
+                var memberExpression = path.Body as MemberExpression;
+                var propInfo = memberExpression.Member as PropertyInfo;
+                if (!propInfo.ReflectedType.IsAssignableFrom(checkType))
+                    throw new ArgumentException(string.Format(
+                        "Expresion '{0}' refers to a property that is not from type {1}.",
+                        path.ToString(),
+                        checkType));
+
+                query = query.Include(propInfo.Name);
+            }
+            var keyProperty = _db.KeyForEntity(checkType);
+            var paramIn = Expression.Parameter(checkType, "p");
+
+            var memberExp = Expression.Property(paramIn, keyProperty);
+            var body = Expression.Equal(
+                memberExp, Expression.Constant(key));
+
+            var expression = Expression.Lambda<Func<TEntity, bool>>(body, paramIn);
+
+            query = query.Where(expression);
+
+            return query;
+        }
+
+        public virtual TEntity GetByKey<TEntity>(params object[] keys)
+        {
+            
+            var objectContext = ((IObjectContextAdapter)this).ObjectContext;
+            var mdw = objectContext.MetadataWorkspace;
+            var items = mdw.GetItems<EntityType>(DataSpace.CSpace);
+            var ourType = typeof(TEntity);
+            var entity = items.First(e => e.BaseType.NamespaceName == ourType.Namespace);
+            
+            var entitySetName = objectContext.DefaultContainerName + "." + entity.Name;
+            var keyNames = entity.KeyMembers.Select(k => k.Name).ToArray();
+
+            if (keys.Length != keyNames.Length)
+            {
+                throw new ArgumentException("Invalid number of key members");
+            }
+            
+            // Merge key names and values by its order in array
+            var keyPairs = keyNames.Zip(keys, (keyName, keyValue) => 
+                new KeyValuePair<string, object>(keyName, keyValue));
+
+            // Build entity key
+            var entityKey = new EntityKey(entitySetName, keyPairs);
+            // Query first current state manager and if entity is not found query database!!!
+            return (TEntity)objectContext.GetObjectByKey(entityKey);
+        }
+
+        /*public virtual TEntity GetByKey<TEntity,TKey>(TKey key) where TEntity:class
+        {
+            var objectContext = ((IObjectContextAdapter)this).ObjectContext;
+
+            // Build entity key
+            var entityKey = new EntityKey(_entitySetName, _keyName, key);
+            // Query first current state manager and if entity is not found query database!!!
+            return (TEntity)objectContext.GetObjectByKey(entityKey);
+        }
+
+        }*/
 
         public IQueryable<TEntity> GetAll<TEntity>() where TEntity : class
         {
@@ -90,21 +188,25 @@ namespace CosStay.Core.Services.Impl
             _db.Set<TEntity>().Remove(entity);
         }
 
-        public void Save()
+        public async Task SaveAsync()
         {
             try
             {
-                _db.SaveChanges();
+                await _db.SaveChangesAsync(_request);
+                return;
             }
             catch (DbEntityValidationException ex)
             {
                 // Retrieve the error messages as a list of strings.
                 var errorMessages = ex.EntityValidationErrors
-                        .SelectMany(x => x.ValidationErrors)
-                        .Select(x => x.ErrorMessage);
+                        .Select(x => new {
+                            Entity = x.Entry.Entity.GetType().Name,
+                            Message = string.Join(", ",x.ValidationErrors.Select(e => e.ErrorMessage))
+                        }
+                );
 
                 // Join the list to a single string.
-                var fullErrorMessage = string.Join("; ", errorMessages);
+                var fullErrorMessage = string.Join("; ", errorMessages.Select(e => e.Entity + ": " + e.Message));
 
                 // Combine the original exception message with the new one.
                 var exceptionMessage = string.Concat(ex.Message, " The validation errors are: ", fullErrorMessage);
@@ -113,6 +215,8 @@ namespace CosStay.Core.Services.Impl
                 throw new DbEntityValidationException(exceptionMessage, ex.EntityValidationErrors);
             }
         }
+
+
 
         public void Dispose()
         {
