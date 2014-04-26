@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNet.Identity;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -41,6 +42,8 @@ namespace CosStay.Model
         [Display(Name = "Date Updated", ShortName = "Updated")]
         public DateTimeOffset DateUpdated { get; set; }
 
+        public string MainImageUrl { get; set; }
+
         public virtual List<Photo> Photos { get; set; }
         public bool IsDeleted { get; set; }
     }
@@ -54,6 +57,28 @@ namespace CosStay.Model
         public bool IsDeleted { get; set; }
         public virtual Country Country { get; set; }
     }
+
+    public class TravelInfo
+    {
+        public virtual LatLng From { get; set; }
+        public virtual LatLng To { get; set; }
+        public virtual List<TravelCost> TravelCosts { get; set; }
+    }
+    public class TravelCost
+    {
+        public virtual TravelMethod Method { get; set; }
+        public decimal? Distance { get; set; }
+        public decimal? Price { get; set; }
+    }
+    public enum TravelMethod
+    {
+        Direct,
+        Walking,
+        Cycling,
+        Driving,
+        PublicTransport,
+        Taxi
+    };
 
     public class Venue : NamedEntity, IAddable, IDeletable, IAuditable
     {
@@ -83,6 +108,8 @@ namespace CosStay.Model
         }
         public double? Lat { get; private set; }
         public double? Lng { get; private set; }
+
+        public bool HasValue { get { return Lat.HasValue && Lng.HasValue; } }
     }
 
     public class Country : NamedEntity, IAuditable
@@ -320,6 +347,7 @@ namespace CosStay.Model
         public string Description { get; set; }
         public virtual LatLng LatLng { get; set; }
         public string Address { get; set; }
+        public string PublicAddress { get; set; }
         public virtual Location Location { get; set; }
 
         public virtual User Owner { get; set; }
@@ -335,6 +363,8 @@ namespace CosStay.Model
         public virtual List<Photo> Photos { get; set; }
         public virtual List<AccomodationRoom> Rooms { get; set; }
         public bool IsDeleted { get; set; }
+
+        public string OwnerId { get { return Owner != null ? Owner.Id : null; } }
     }
 
 
@@ -416,6 +446,7 @@ namespace CosStay.Model
         [Display(Name = "Date Added", ShortName = "Added")]
         public DateTimeOffset DateAdded { get; set; }
         public bool IsDeleted { get; set; }
+        public string OwnerId { get { return Owner != null ? Owner.Id : null; } }
     }
 
     public class Bed : IEntity, IAddable, IDeletable, IAuditable
@@ -454,11 +485,13 @@ namespace CosStay.Model
     public class AccomodationVenueFeature : NamedEntity, IAddable, IDeletable, IAuditable
     {
         public bool IsDeleted { get; set; }
+        public virtual List<AccomodationVenue> Rooms { get; set; }
     }
 
     public class AccomodationRoomFeature : NamedEntity, IAddable, IDeletable, IAuditable
     {
         public bool IsDeleted { get; set; }
+        public virtual List<AccomodationRoom> Rooms { get; set; }
     }
 
 }

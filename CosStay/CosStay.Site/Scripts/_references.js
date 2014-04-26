@@ -12,4 +12,6 @@
 /// <reference path="cosstay.js" />
 /// <reference path="moment-with-langs.js" />
 /// <reference path="moment.js" />
+/// <reference path="map-icons-ie7.js" />
+/// <reference path="map-icons.js" />
 /// <reference path="clndr.js" />

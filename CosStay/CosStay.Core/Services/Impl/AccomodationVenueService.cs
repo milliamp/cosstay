@@ -43,6 +43,7 @@ namespace CosStay.Core.Services.Impl
             // TODO: Do we really have to this whole pile of crap manually!?!?!
             // we have automapper right!?
             instance.Address = dtoInstance.Address;
+            instance.PublicAddress = dtoInstance.PublicAddress;
             instance.AllowsBedSharing = dtoInstance.AllowsBedSharing;
             instance.AllowsMixedRooms = dtoInstance.AllowsMixedRooms;
             instance.Features = dtoInstance.Features;

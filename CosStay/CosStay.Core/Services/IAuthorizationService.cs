@@ -9,8 +9,8 @@ namespace CosStay.Core.Services
 {
     public interface IAuthorizationService
     {
-        bool IsAuthorizedTo<TEntity>(User user, ActionType actionType, TEntity entity) where TEntity : IEntity;
-        bool IsAuthorizedTo<TEntity>(ActionType actionType, TEntity entity) where TEntity : IEntity;
+        bool IsAuthorizedTo<TEntity>(User user, ActionType actionType, TEntity entity) where TEntity : class;
+        bool IsAuthorizedTo<TEntity>(ActionType actionType, TEntity entity) where TEntity : class;
     }
 
     public enum ActionType

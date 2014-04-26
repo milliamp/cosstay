@@ -96,7 +96,7 @@ namespace CosStay.Site.Controllers
                 _es.Add(instance2);
                 await _es.SaveAsync();
             }
-            return View(_es.GetAll<EventInstance>().ToArray());
+            return View(_es.GetAll<EventInstance>().OrderBy(ei => ei.StartDate).ToArray());
 
         }
 
@@ -127,7 +127,6 @@ namespace CosStay.Site.Controllers
 
                         dynamic friendsAttendingResult = await fb.GetTaskAsync("fql", new { q = fql });
                         friendsAttendingSummary = FacebookUserSummaryHtmlString(friendsAttendingResult.data);
-                        var i = 0;
                     }
                 }
 
@@ -150,6 +149,7 @@ namespace CosStay.Site.Controllers
                 Location = (instance.Venue != null && instance.Venue.Location != null) ? instance.Venue.Location.Name : "",
                 ParentEventId = instance.Event != null ? instance.Event.Id : 0,
                 Photos = instance.Photos.ToArray(),
+                MainImageUrl = instance.MainImageUrl,
                 StartDate = instance.StartDate,
                 Url = instance.Url,
                 VenueLatLng = instance.Venue != null ? instance.Venue.LatLng : null,
@@ -310,6 +310,7 @@ namespace CosStay.Site.Controllers
                     Location = (instance.Venue != null && instance.Venue.Location != null) ? instance.Venue.Location.Name : "",
                     ParentEventId = instance.Event != null ? instance.Event.Id : 0,
                     Photos = instance.Photos.ToArray(),
+                    MainImageUrl = instance.MainImageUrl,
                     StartDate = instance.StartDate,
                     Url = instance.Url,
                     VenueLatLng = instance.Venue != null ? instance.Venue.LatLng : null,
@@ -332,6 +333,9 @@ namespace CosStay.Site.Controllers
                     fbVm.StartDate = DateTime.Parse(eventDetails.start_time);
                     fbVm.Name = eventDetails.name;
                     fbVm.DateUpdated = dateUpdated;
+                    dynamic picture = await fb.GetTaskAsync(instance.FacebookEventId + "/picture?type=large&redirect=false");
+
+                    fbVm.MainImageUrl = picture.data.url;
                     fbVm.Url = "https://www.facebook.com/events/" + instance.FacebookEventId;
                     if (eventDetails.venue != null)
                     {
@@ -345,14 +349,15 @@ namespace CosStay.Site.Controllers
                             Address = eventDetails.venue.street
                         };
                         var fbvenue = await _venueService.GetOrCreateMatchingVenueAsync(venue);
-                        if (fbvenue != null)
-                        {
-                            fbVm.Address = fbvenue.Address;
-                            if (fbvenue.Location != null)
-                                fbVm.Location = instance.Venue.Location.Name;
-                            fbVm.VenueName = fbvenue.Name;
-                            fbVm.VenueLatLng = fbvenue.LatLng;
-                        }
+                        if (fbvenue == null)
+                            fbvenue = venue;
+                        
+                        fbVm.Address = fbvenue.Address;
+                        if (fbvenue.Location != null)
+                            fbVm.Location = instance.Venue.Location.Name;
+                        fbVm.VenueName = fbvenue.Name;
+                        fbVm.VenueLatLng = fbvenue.LatLng;
+                        
                     }
                     vm.Event_Facebook = fbVm;
                 }
@@ -365,7 +370,7 @@ namespace CosStay.Site.Controllers
         [HttpPost]
         [Route("updatefromfacebook/{id:int}")]
         [ActionType(Core.Services.ActionType.Update)]
-        public async Task<ActionResult> UpdateFromFacebook(int id, bool confirm)
+        public async Task<ActionResult> UpdateFromFacebook(int id, EventInstanceUpdateStatusViewModel vm)
         {
             var instance = await _es.GetAsync<EventInstance>(id);
             if (instance == null)
@@ -394,14 +399,26 @@ namespace CosStay.Site.Controllers
                 if (eventDetails.id == instance.FacebookEventId)
                 {
                     var dateUpdated = DateTimeOffset.Parse(eventDetails.updated_time);
-                    if (instance.DateUpdated < dateUpdated)
-                    {
+                    if (vm.UpdateDescription)
                         instance.Description = eventDetails.description;
+                    if (vm.UpdateEnd)
                         instance.EndDate = DateTime.Parse(eventDetails.end_time);
+                    if (vm.UpdateStart)
                         instance.StartDate = DateTime.Parse(eventDetails.start_time);
+                    if (vm.UpdateName)
                         instance.Name = eventDetails.name;
-                        instance.DateUpdated = dateUpdated;
+
+                    instance.DateUpdated = dateUpdated;
+                    if (vm.UpdateUrl)
                         instance.Url = "https://www.facebook.com/events/" + instance.FacebookEventId;
+
+                    if (vm.UpdateCoverImage)
+                    {
+                        dynamic picture = await fb.GetTaskAsync(instance.FacebookEventId + "/picture?type=large&redirect=false");
+                        instance.MainImageUrl = picture.data.url;
+                    }
+                    if (vm.UpdateVenue)
+                    {
                         if (eventDetails.venue != null)
                         {
                             var venue = new Venue()
@@ -413,10 +430,16 @@ namespace CosStay.Site.Controllers
                                 LatLng = new LatLng(eventDetails.venue.latitude, eventDetails.venue.longitude),
                                 Address = eventDetails.venue.street
                             };
-                            instance.Venue = await _venueService.GetOrCreateMatchingVenueAsync(venue);
+                            var matchingVenue = await _venueService.GetOrCreateMatchingVenueAsync(venue);
+                            if (matchingVenue == null)
+                            {
+                                _es.Add(venue);
+                                matchingVenue = venue;
+                            }
+                            instance.Venue = matchingVenue;
                         }
-                        await _es.SaveAsync();
                     }
+                    await _es.SaveAsync();
                 }
             }
             return RedirectToAction("Edit", new { id = id });

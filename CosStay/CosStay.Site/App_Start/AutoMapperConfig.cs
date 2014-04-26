@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CosStay.Model;
 using CosStay.Site.Models;
+using System.Linq;
 
 namespace CosStay.Site
 {
@@ -12,6 +13,7 @@ namespace CosStay.Site
                 .ReverseMap()
                 .ForMember(r => r.Beds, c => c.UseDestinationValue());
             Mapper.CreateMap<AccomodationVenue, AccomodationVenueViewModel>()
+                .ForMember("TotalBeds", c=> c.MapFrom(v => v.Rooms.Where(r => !r.IsDeleted).Select(r => r.Beds.Count).Sum()))
                 .ReverseMap()
                 .ForMember(r => r.Rooms, c => c.UseDestinationValue());
 
@@ -22,6 +24,7 @@ namespace CosStay.Site
                 .ForMember(b => b.BedSize, c => c.MapFrom(b => new BedSize() { Id = b.BedSizeId }))
                 .ForMember(b => b.BedType, c => c.MapFrom(b => new BedType() { Id = b.BedTypeId }));
             Mapper.CreateMap<User, UserViewModel>().ReverseMap();
+            Mapper.CreateMap<Location, LocationViewModel>().ReverseMap();
             //Mapper.AssertConfigurationIsValid();
         }
     }

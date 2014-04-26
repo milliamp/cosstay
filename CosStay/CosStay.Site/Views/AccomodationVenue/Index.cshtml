@@ -1,57 +1,87 @@
-﻿@model IEnumerable<CosStay.Model.AccomodationVenue>
+﻿@model IEnumerable<CosStay.Site.Models.LocationViewModel>
 
 @{
     ViewBag.Title = "Index";
 }
 
 <h2>Index</h2>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/cosstay.viewmodels.js"></script>
+}
+
 
 <p>
     @Html.TrimmedActionLink("Create New", "Create", (CosStay.Model.AccomodationVenue)null)
 </p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.Name)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Address)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.DateAdded)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.AllowsBedSharing)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.AllowsMixedRooms)
-        </th>
-        <th></th>
-    </tr>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="row">
+            <div class="col-md-5">
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.Name)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Address)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.DateAdded)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.AllowsBedSharing)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.AllowsMixedRooms)
-        </td>
-        <td>
-            @Html.TrimmedActionLink("Edit", "Edit", item, new { id=item.Id }, true) |
-            @Html.TrimmedActionLink("Details", "Details", item, new { id = item.Id, name = item.Name }, true) |
-            @Html.TrimmedActionLink("Delete", "Delete", item, new { id = item.Id }, true)
-        </td>
-    </tr>
-}
+                <div class="input-group">
+                    <label class="sr-only" for="search">Search</label>
+                    <div class="input-group-btn">
+                        <button type="button" class="btn btn-default dropdown-toggle" style="width: 100px;" data-toggle="dropdown"><span data-bind="text:location"></span> <span class="caret"></span></button>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" data-bind="click:function () {locationId(0); location('All cities')}">All cities</a></li>
+                            @foreach (var loc in Model)
+                            {
+                                <text>
+                                    <li><a href="#" data-bind="click:function () {locationId(@loc.Id); location('@loc.Name')}">@loc.Name</a></li>
+                                </text>
+                            }
+                        </ul>
+                    </div><!-- /btn-group -->
 
-</table>
+                    <input id="search" type="search" class="form-control" placeholder="Search" data-bind="value:searchTerm">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button">Go!</button>
+                    </span>
+                </div><!-- /input-group -->
+            </div>
+        </div>
+    </div>
+    <div class="panel-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayColumnNameFor(new CosStay.Site.Models.AccomodationVenueViewModel(), model => model.Name)
+                    </th>
+                    <th>
+                        @Html.DisplayColumnNameFor(new CosStay.Site.Models.AccomodationVenueViewModel(), model => model.Address)
+                    </th>
+                    <th>
+                        @Html.DisplayColumnNameFor(new CosStay.Site.Models.AccomodationVenueViewModel(), model => model.TotalBeds)
+                    </th>
+                    <th>
+                        @Html.DisplayColumnNameFor(new CosStay.Site.Models.AccomodationVenueViewModel(), model => model.AllowsBedSharing)
+                    </th>
+                    <th>
+                        @Html.DisplayColumnNameFor(new CosStay.Site.Models.AccomodationVenueViewModel(), model => model.AllowsMixedRooms)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: items">
+                <tr>
+                    <td><a href="" data-bind="text:Name, attr: { href: '/accomodation/' + Id }"></a></td>
+                    <td data-bind="text:Address"></td>
+                    <td data-bind="text:TotalBeds"></td>
+                    <td data-bind="text:AllowsBedSharing"></td>
+                    <td data-bind="text:AllowsMixedRooms"></td>
+                    <td>
+                        @*@Html.TrimmedActionLink("Edit", "Edit", item, new { id = item.Id }, true) |
+                            @Html.TrimmedActionLink("Details", "Details", item, new { id = item.Id, name = item.Name }, true) |
+                            @Html.TrimmedActionLink("Delete", "Delete", item, new { id = item.Id }, true)*@
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+    <script>
+        var viewModel = new accomodationVenueSearchViewModel();
+        ko.applyBindings(viewModel);
+    </script>

@@ -14,7 +14,7 @@ namespace CosStay.Site.App_Start
     using CosStay.Core.Services.Impl;
     using System.Configuration;
     using CosStay.Model;
-using Ninject.Activation;
+    using Ninject.Activation;
     using System.Security.Claims;
     using Microsoft.AspNet.Identity;
     using System.Web.Mvc.Async;
@@ -90,6 +90,7 @@ using Ninject.Activation;
             kernel.Bind<IAuthorizationService>().To<AuthorizationService>().InRequestScope();
             kernel.Bind<ILocationService>().To<LocationService>().InRequestScope();
             kernel.Bind<IVenueService>().To<VenueService>().InRequestScope();
+            kernel.Bind<ITravelService>().To<TravelService>().InRequestScope();
         }
 
         static object CurrentRequest(IContext context)

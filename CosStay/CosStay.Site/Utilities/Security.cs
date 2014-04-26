@@ -14,7 +14,7 @@ namespace CosStay.Site
 {
     public static class Security
     {
-        public static bool IsAccessibleToUser<TEntity>(IPrincipal principal, string actionAuthorize, string controllerAuthorize, TEntity entity) where TEntity:IEntity
+        public static bool IsAccessibleToUser<TEntity>(IPrincipal principal, string actionAuthorize, string controllerAuthorize, TEntity entity) where TEntity:class
         {
             // Find Controller
             Assembly assembly = Assembly.GetExecutingAssembly();

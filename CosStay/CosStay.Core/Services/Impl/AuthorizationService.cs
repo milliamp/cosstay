@@ -17,12 +17,12 @@ namespace CosStay.Core.Services.Impl
             _userService = userService;
         }
 
-        public bool IsAuthorizedTo<TEntity>(ActionType actionType, TEntity entity) where TEntity : IEntity
+        public bool IsAuthorizedTo<TEntity>(ActionType actionType, TEntity entity) where TEntity : class
         {
             return IsAuthorizedTo(_userService.CurrentUser, actionType, entity);
         }
 
-        public bool IsAuthorizedTo<TEntity>(User user, ActionType actionType, TEntity entity) where TEntity : IEntity
+        public bool IsAuthorizedTo<TEntity>(User user, ActionType actionType, TEntity entity) where TEntity : class
         {
             if (user.IsDeleted)
                 return false;
@@ -44,7 +44,7 @@ namespace CosStay.Core.Services.Impl
                 {
                     var ownedEntity = (IOwnable)entity;
                     // If the entity can be owned, return true if user is owner
-                    if (ownedEntity.Owner != null && ownedEntity.Owner.Id == user.Id)
+                    if (ownedEntity.OwnerId != null && ownedEntity.OwnerId == user.Id)
                         return true;
                 }
                 // if trying to create something that can be owned, we're good

@@ -8,6 +8,6 @@ namespace CosStay.Model
 {
     public interface IOwnable
     {
-        User Owner { get; }
+        string OwnerId { get; }
     }
 }

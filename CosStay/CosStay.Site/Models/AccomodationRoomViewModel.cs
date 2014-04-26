@@ -1,6 +1,7 @@
 ﻿using CosStay.Model;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 
@@ -24,6 +25,7 @@ namespace CosStay.Site.Models
 
         public List<AccomodationRoomFeature> Features { get; set; }
 
+        [Display(Name = "Date Added")]
         public DateTimeOffset DateAdded { get; set; }
 
         public virtual List<Photo> Photos { get; set; }

@@ -10,24 +10,27 @@
     @Html.TrimmedActionLink("Create New", "Create", (CosStay.Model.EventInstance)null)
 </p>
 
-@foreach (var item in Model) {
-    <section class="panel panel-default">
-        <header class="panel-heading">
-            @Html.ActionLink(item.Name, "Details", new { id = item.Id, name = (ViewContext.Controller as CosStay.Site.Controllers.BaseController).SafeUri(item.Name) })
-        </header>
-        <div class="panel-body">
-            <p>
-                @Html.DisplayFor(modelItem => item.Description)
-            </p>
-            <p>
-                From @Html.DisplayFor(modelItem => item.StartDate.Date)
-                until @Html.DisplayFor(modelItem => item.EndDate.Date)
-            </p>
-            <p>
-                @Html.TrimmedActionLink("Edit", "Edit", item, new { id = item.Id }) |
-                @Html.TrimmedActionLink("Delete", "Delete", item, new { id = item.Id })
-            </p>
-        </div>
-    </section>
-}
+@foreach (var item in Model)
+{
+    <section class="tile" style="background-image: url('@item.MainImageUrl')">
 
+        <div class="tile-heading">
+            <header>
+                @Html.ActionLink(item.Name, "Details", new { id = item.Id, name = (ViewContext.Controller as CosStay.Site.Controllers.BaseController).SafeUri(item.Name) })
+            </header>
+            <p>
+                @item.StartDate.ToString("MMMM dd") @if (item.StartDate.Date != item.EndDate.Date)
+                {<text>
+                    - @item.EndDate.ToString("MMMM dd")
+                </text>}<br />
+                Starts at @item.StartDate.ToShortTimeString(). Ends at @item.EndDate.ToShortTimeString().
+            </p>
+
+        </div>
+
+        <p>
+            @Html.TrimmedActionLink("Edit", "Edit", item, new { id = item.Id })
+        </p>
+</section>
+}
+<div class="clearfix"></div>

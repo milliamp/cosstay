@@ -96,14 +96,14 @@ namespace CosStay.Site.Controllers
         }
 
 
-        protected async Task DenyIfNotAuthorizedAsync<TEntity>(ActionType actionType) where TEntity : IEntity
+        protected async Task DenyIfNotAuthorizedAsync<TEntity>(ActionType actionType) where TEntity : class
         {
             
             if (!_auth.IsAuthorizedTo<TEntity>(await GetCurrentUserAsync(), actionType, default(TEntity)))
                 throw new HttpException(403, "Access Denied");
         }
 
-        protected async Task DenyIfNotAuthorizedAsync<TEntity>(ActionType actionType, TEntity entity) where TEntity : IEntity
+        protected async Task DenyIfNotAuthorizedAsync<TEntity>(ActionType actionType, TEntity entity) where TEntity : class
         {
             if (!_auth.IsAuthorizedTo(await GetCurrentUserAsync(), actionType, entity))
                 throw new HttpException(403, "Access Denied");

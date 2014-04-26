@@ -7,46 +7,53 @@
 <h2>@Model.Name</h2>
 <h3><a href="@Model.Url">@Model.Url</a></h3>
 <div>
-    <h4>@Model.Description</h4>
+    
 	<hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.StartDate)
-        </dt>
+    <div class="col-md-6">
+        <p>@Model.Description</p>
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.DisplayNameFor(model => model.StartDate)
+            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.StartDate)
-        </dd>
+            <dd>
+                @Html.DisplayFor(model => model.StartDate)
+            </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.EndDate)
-        </dt>
+            <dt>
+                @Html.DisplayNameFor(model => model.EndDate)
+            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.EndDate)
-        </dd>
+            <dd>
+                @Html.DisplayFor(model => model.EndDate)
+            </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.DateUpdated)
-        </dt>
+            <dt>
+                @Html.DisplayNameFor(model => model.DateUpdated)
+            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.DateUpdated)
-        </dd>
+            <dd>
+                @Html.DisplayFor(model => model.DateUpdated)
+            </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.VenueName)
-        </dt>
+            <dt>
+                @Html.DisplayNameFor(model => model.VenueName)
+            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.VenueName)
-        </dd>
+            <dd>
+                @Html.DisplayFor(model => model.VenueName)
+            </dd>
 
-    </dl>
+        </dl>
 
-    <div id="map-canvas" style="height: 400px;">
+        <p>Attending? @Model.CurrentUserAttending</p>
+        <p>@Model.FriendsAttending</p>
 
+        <p>
+            @Html.ActionLink("Back to List", "Index")
+        </p>
     </div>
+    <div class="col-md-6">
         <div id="mini-clndr">
             <script id="mini-clndr-template" type="text/template">
 
@@ -65,13 +72,13 @@
 
             </script>
         </div>
+        <div id="map-canvas" style="height:400px">
 
-        <p>Attending? @Model.CurrentUserAttending</p>
-        <p>@Model.FriendsAttending</p>
+        </div>
+        
     </div>
-<p>
-    @Html.ActionLink("Back to List", "Index")
-</p>
+
+</div>
 
 @section Scripts
 {

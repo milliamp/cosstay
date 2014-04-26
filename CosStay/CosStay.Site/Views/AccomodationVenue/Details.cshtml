@@ -1,59 +1,92 @@
-﻿@model CosStay.Model.AccomodationVenue
+﻿@model CosStay.Site.Models.AccomodationVenueViewModel
 @using GravatarHelper.Extensions
 @{
     ViewBag.Title = "Details";
 }
 
-@if (Model.LatLng != null) { 
-@section scripts
+@if (Model.LatLng != null)
 {
-    <script type="text/javascript"
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB21AFsFMbmFCkYKe7ZrBN46p7Rop-twLY&sensor=false">
-</script>
-<script type="text/javascript">
-    function initialize() {
-        var mapOptions = {
-            center: new google.maps.LatLng(@Model.LatLng.Lat , @Model.LatLng.Lng),
-            zoom: 16
-        };
+    @section scripts
+{
+        <script type="text/javascript"
+                src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB21AFsFMbmFCkYKe7ZrBN46p7Rop-twLY&sensor=false">
+        </script>
 
-        var map = new google.maps.Map(document.getElementById("map-canvas"),
-            mapOptions);
+        <link rel="stylesheet" type="text/css" href="~/Content/map-icons.css" />
+        <script src="~/scripts/map-icons.js"></script>
+        <script type="text/javascript">
+            function initialize() {
+                var mapOptions = {
+                    center: new google.maps.LatLng(@Model.LatLng.Lat , @Model.LatLng.Lng),
+                    zoom: 13
+                };
 
-        var accomodationMarker = new google.maps.Marker({
-            position: new google.maps.LatLng(@Model.LatLng.Lat , @Model.LatLng.Lng),
-            map: map,
-            title:"@Model.Name.Replace("\"", "\\\"")"
-        })
+                var map = new google.maps.Map(document.getElementById("map-canvas"),
+                    mapOptions);
+
+                var accomodationMarker = new Marker({
+                    map: map,
+                    zIndex: 9,
+                    title: '@Model.Name',
+                    position:  new google.maps.LatLng(@Model.LatLng.Lat , @Model.LatLng.Lng),
+                    icon: {
+                        path: MAP_PIN,
+                        fillColor: '#2fa4e7',
+                        fillOpacity: 1,
+                        strokeColor: '#ffffff',
+                        strokeWeight: 1,
+                        scale: 1/4
+                    },
+                    label: '<i class="glyphicon glyphicon-home"></i>'
+                });
+
+                @foreach (var eventVenue in Model.TravelInfo.Where(v => v.Key.Venue != null && v.Key.Venue.LatLng.HasValue).Select(kv => kv.Key))
+                {<text>
+                    new Marker({
+                    map: map,
+                    zIndex: 9,
+                    title: '@eventVenue.Name @@ @eventVenue.Venue.Name',
+                    position:  new google.maps.LatLng(@eventVenue.Venue.LatLng.Lat , @eventVenue.Venue.LatLng.Lng),
+                    icon: {
+                        path: MAP_PIN,
+                        fillColor: '#2fa4e7',
+                        fillOpacity: 1,
+                        strokeColor: '#ffffff',
+                        strokeWeight: 1,
+                        scale: 1/4
+                    },
+                    label: '<i class="glyphicon glyphicon-star"></i>'
+                });
+                </text>}
+            }
+            google.maps.event.addDomListener(window, 'load', initialize);
+        </script>
     }
-    google.maps.event.addDomListener(window, 'load', initialize);
-</script>
-}
 }
 
 <h2>@Html.DisplayFor(model => model.Name)</h2>
 
-    <address>@Html.DisplayFor(model => model.Address)</address>
-    @if (Model.Owner != null)
+<address>@Html.DisplayFor(model => model.PublicAddress)</address>
+@if (Model.Owner != null)
 {
     <div class="owner panel panel-primary">
         <div class="panel-heading">
             Owner
-         </div>
+        </div>
         <div class="panel-body">
             <div style="float:left;">@Html.Gravatar(Model.Owner.Email, 80)</div>
             <div>
-                @Model.Owner.Name <br />@Model.Owner.JoinDate.ToLocalTime()
+                @Model.Owner.Name <br />
             </div>
         </div>
     </div>
 }
 
-	<hr />
-    <div class="row">
+<hr />
+<div class="row">
 
-
-        <dl class="dl-horizontal col-md-6">
+    <div class="col-md-6">
+        <dl class="dl-horizontal">
             <dt>
                 @Html.DisplayNameFor(model => model.DateAdded)
             </dt>
@@ -79,8 +112,26 @@
             </dd>
 
         </dl>
-        <div id="map-canvas" style="height: 400px;" class="col-md-6"></div>
+        @if (Model.TravelInfo != null)
+        {
+            <div class="travel-info">
+                @foreach (var eventTravel in Model.TravelInfo)
+                {
+                    <p>
+                        To @eventTravel.Key.Name:
+                        <ul>
+                            @foreach (var travelMethod in eventTravel.Value.TravelCosts)
+                            {
+                                <li>@Enum.GetName(typeof(CosStay.Model.TravelMethod), travelMethod.Method): @travelMethod.Distance km</li>
+                            }
+                        </ul>
+                    </p>
+                }
+            </div>
+        }
     </div>
+    <div id="map-canvas" style="height: 400px;" class="col-md-6"></div>
+</div>
 <p>
     @Html.TrimmedActionLink("Edit", "Edit", Model, new { id = Model.Id }) |
     @Html.ActionLink("Back to List", "Index")

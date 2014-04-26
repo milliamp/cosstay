@@ -77,6 +77,8 @@
     <Compile Include="Services\Impl\FacebookCredentials.cs" />
     <Compile Include="Services\Impl\FacebookServiceBase.cs" />
     <Compile Include="Services\ILocationService.cs" />
+    <Compile Include="Services\ITravelService.cs" />
+    <Compile Include="Services\Impl\TravelService.cs" />
     <Compile Include="Services\IVenueService.cs" />
     <Compile Include="Services\Impl\LocationService.cs" />
     <Compile Include="Services\Impl\UserFacebookService.cs" />

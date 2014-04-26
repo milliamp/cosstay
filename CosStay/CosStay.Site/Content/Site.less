@@ -64,8 +64,8 @@ h5 input{
 
     .room {
         float: left;
-        width: 200px;
-        height: 200px;
+        width: 300px;
+        min-height: 200px;
         border: 1px solid @brand-primary;
         margin: 10px;
         padding: 10px;
@@ -235,3 +235,46 @@ h5 input{
                                 text-align: center;
                                 color: white;
                             }
+                            
+.tile
+{
+    background: transparent top left no-repeat;
+    background-size:cover;
+    float: left;
+    position: relative;
+    width: 300px;
+    height: 300px;
+    margin: 0 20px 20px 0;
+}
+
+.tile .tile-heading{
+    text-shadow: 0px 0px 5px black;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 6.5em;
+    padding: 10px;
+    background: rgba(20,20,20, 0.7);
+    color: white;
+}
+.tile .tile-heading header
+{
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+
+            .marker-label,
+            .marker-icon {
+                z-index: 99;
+                position: absolute;
+                display: block;
+                margin-top: -38px;
+                margin-left: -11px;
+                width: 23px;
+                height: 32px;
+                font-size: 17px !important;
+                text-align: center;
+                color: #FFFFFF;
+                white-space: nowrap;
+            }

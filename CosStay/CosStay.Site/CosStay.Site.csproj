@@ -200,6 +200,7 @@
     <Compile Include="Models\AccomodationVenueViewModel.cs" />
     <Compile Include="Models\BedViewModel.cs" />
     <Compile Include="Models\EventInstanceUpdateStatusViewModel.cs" />
+    <Compile Include="Models\LocationViewModel.cs" />
     <Compile Include="Models\UserViewModel.cs" />
     <Compile Include="Utilities\ActionTypeAttribute.cs" />
     <Compile Include="Utilities\AsyncInline.cs" />
@@ -217,6 +218,7 @@
     <Compile Include="Models\ContentPageViewModel.cs" />
     <Compile Include="Models\EventViewModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities\DisplayNameHtmlHelper.cs" />
     <Compile Include="Utilities\JsonNetResult.cs" />
     <Compile Include="Utilities\LoginActionParameters.cs" />
     <Compile Include="Startup.cs" />
@@ -238,12 +240,21 @@
       <DependentUpon>bootstrap.less</DependentUpon>
     </Content>
     <Content Include="Content\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="Content\fonts\map-icons.dev.svg" />
+    <Content Include="Content\fonts\map-icons.svg" />
+    <Content Include="Content\map-icons.css" />
+    <Content Include="Content\variables-bootswatch.css">
+      <DependentUpon>variables-bootswatch.less</DependentUpon>
+    </Content>
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
     <Content Include="Content\bootstrap\bootstrap.css.map">
       <DependentUpon>bootstrap.css</DependentUpon>
     </Content>
+    <Content Include="Content\fonts\map-icons.eot" />
+    <Content Include="Content\fonts\map-icons.ttf" />
+    <Content Include="Content\fonts\map-icons.woff" />
     <None Include="Content\site.less" />
     <Content Include="Content\bootswatch.less" />
     <Content Include="Content\variables-bootswatch.less" />
@@ -311,6 +322,9 @@
     <Content Include="Scripts\knockout-3.1.0.js" />
     <Content Include="Scripts\knockout.mapping-latest.debug.js" />
     <Content Include="Scripts\knockout.mapping-latest.js" />
+    <Content Include="Scripts\map-icons-ie7.js" />
+    <Content Include="Scripts\map-icons.js" />
+    <Content Include="Scripts\map-icons.min.js" />
     <Content Include="Scripts\modernizr-2.7.2.js" />
     <Content Include="Scripts\moment-with-langs.js" />
     <Content Include="Scripts\moment-with-langs.min.js" />

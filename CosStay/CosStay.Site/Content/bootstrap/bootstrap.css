@@ -1,4 +1,4 @@
-﻿/*! normalize.css v3.0.0 | MIT License | git.io/normalize */
+/*! normalize.css v3.0.0 | MIT License | git.io/normalize */
 html {
   font-family: sans-serif;
   -ms-text-size-adjust: 100%;
@@ -5153,7 +5153,7 @@ a.list-group-item-danger.active:focus {
 }
 .panel-default > .panel-heading {
   color: #555555;
-  background-color: #f5f5f5;
+  background-color: rgba(229, 229, 229, 0.8);
   border-color: #dddddd;
 }
 .panel-default > .panel-heading + .panel-collapse .panel-body {
@@ -6113,8 +6113,8 @@ h5 input {
 }
 .rooms .room {
   float: left;
-  width: 200px;
-  height: 200px;
+  width: 300px;
+  min-height: 200px;
   border: 1px solid #2fa4e7;
   margin: 10px;
   padding: 10px;
@@ -6261,5 +6261,42 @@ h5 input {
   display: inline-block;
   text-align: center;
   color: white;
+}
+.tile {
+  background: transparent top left no-repeat;
+  background-size: cover;
+  float: left;
+  position: relative;
+  width: 300px;
+  height: 300px;
+  margin: 0 20px 20px 0;
+}
+.tile .tile-heading {
+  text-shadow: 0px 0px 5px black;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 6.5em;
+  padding: 10px;
+  background: rgba(20, 20, 20, 0.7);
+  color: white;
+}
+.tile .tile-heading header {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+.marker-label,
+.marker-icon {
+  z-index: 99;
+  position: absolute;
+  display: block;
+  margin-top: -38px;
+  margin-left: -11px;
+  width: 23px;
+  height: 32px;
+  font-size: 17px !important;
+  text-align: center;
+  color: #FFFFFF;
+  white-space: nowrap;
 }
 /*# sourceMappingURL=bootstrap.css.map */

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -17,6 +18,11 @@ namespace CosStay.Site
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
             AutoMapperConfig.RegisterMaps();
+
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+            };
 
         }
 

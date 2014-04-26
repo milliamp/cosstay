@@ -1,4 +1,47 @@
-﻿
+﻿var accomodationVenueSearchViewModel = function () {
+    this.$type = 'accomodationVenueSearchViewModel';
+    var root = this;
+    this.getAccomodationVenues = function() {
+        var params = {
+            limit: this.pager.limit(),
+            startIndex: this.pager.limit() * (this.pager.page() - 1)
+        };
+
+        $.ajax({
+            type: 'GET',
+            url: '/accomodation/',
+            data: {
+                q: root.searchTerm(),
+                l: root.locationId(),
+                start:params.startIndex, 
+                limit:params.limit
+            },
+            context: this,
+            success: function (data) {
+                this(data.Items);
+                this.pager.totalCount(data.TotalCount);
+            },
+            dataType: 'json'
+        });
+    };
+
+    this.items = ko.observableArray([]).extend({
+        datasource: this.getAccomodationVenues,
+        pager: {
+            limit: 10
+        }
+    });
+    this.searchTerm = ko.observable("");
+
+    this.locationId = ko.observable(0);
+    this.location = ko.observable("All cities");
+};
+
+
+
+
+
+
 var accomodationVenueViewModel = function (data) {
     this.$type = 'accomodationVenueViewModel';
     var self = this;

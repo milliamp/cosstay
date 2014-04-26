@@ -8,6 +8,7 @@ using System;
 using System.Web;
 using CosStay.Core.Services;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace CosStay.Site.Controllers
 {
@@ -16,18 +17,61 @@ namespace CosStay.Site.Controllers
     public class AccomodationVenueController : BaseController
     {
         private IAccomodationVenueService _accomodationVenueService;
-        public AccomodationVenueController(IAccomodationVenueService accomodationVenueService, IEntityStore entityStore, IAuthorizationService authorizationService)
+        private ITravelService _travelService;
+        private IDateTimeService _dateTimeService;
+        private ILocationService _locationService;
+
+        public AccomodationVenueController(IAccomodationVenueService accomodationVenueService,
+            IEntityStore entityStore,
+            IAuthorizationService authorizationService,
+            ITravelService travelService,
+            IDateTimeService dateTimeService,
+            ILocationService locationService)
             : base(entityStore, authorizationService)
         {
             _accomodationVenueService = accomodationVenueService;
+            _travelService = travelService;
+            _dateTimeService = dateTimeService;
+            _locationService = locationService;
         }
 
         // GET: /AccomodationVenue/
-        public async Task<ActionResult> Index()
+        public async Task<ActionResult> Index(string q, int l = 0, int start = 0, int limit = int.MaxValue, bool json = false)
         {
-            var list = await _es.GetAll<AccomodationVenue>().IncludePaths(v => v.Owner).ToAsyncList();
-            list = list.Where(v => _auth.IsAuthorizedTo(ActionType.Read, v)).ToList();
-            return View(list);
+            var list = new List<AccomodationVenueViewModel>();
+            var totalResults = 0;
+
+            if (Request.IsAjaxRequest() || json)
+            {
+                var query = _es.GetAll<AccomodationVenue>().IncludePaths(v => v.Owner);
+
+                if (!string.IsNullOrWhiteSpace(q))
+                {
+                    query = query.Where(v =>
+                        v.Name.Contains(q)
+                        || v.PublicAddress.Contains(q)
+                        || v.Location.Name.Contains(q)
+                        || v.Rooms.Any(r => r.Description.Contains(q))
+                        || v.Rooms.Any(r => r.Name.Contains(q)));
+                }
+                if (l > 0)
+                    query = query.Where(v => v.Location.Id == l);
+
+                var dataList = await query.ToAsyncList();
+                dataList = dataList.Where(v => _auth.IsAuthorizedTo(ActionType.Read, v)).ToList();
+                totalResults = dataList.Count;
+                list = dataList.Skip(start)
+                    .Take(limit)
+                    .Select(v => GetBasicViewModel(v))
+                    .ToList();
+
+                return Json(new
+                {
+                    Items = list,
+                    TotalCount = totalResults
+                });
+            }
+            return View(_es.GetAll<Location>().ToList().Select(loc => Mapper.Map<LocationViewModel>(loc)));
         }
 
         // GET: /AccomodationVenue/Details/5
@@ -37,7 +81,25 @@ namespace CosStay.Site.Controllers
         {
             var instance = await ValidateDetailsAsync<AccomodationVenue>(_es, id, name);
             await DenyIfNotAuthorizedAsync(ActionType.Read, instance);
-            return View(instance);
+            var vm = GetExtendedViewModel(instance);
+
+            if (vm.LatLng.HasValue)
+            {
+                // TODO: Move to EventService
+                var events = await _es.GetAll<EventInstance>()
+                    .Where(e => e.StartDate > _dateTimeService.Now)
+                    .Where(e => e.Venue.Location.Id == instance.Location.Id)
+                    .ToAsyncList();
+
+                vm.TravelInfo = new Dictionary<EventInstance, TravelInfo>();
+                foreach (var eventInstance in events)
+                {
+                    if (eventInstance.Venue == null || !eventInstance.Venue.LatLng.HasValue)
+                        continue;
+                    vm.TravelInfo[eventInstance] = _travelService.CalculateTravelInfo(vm.LatLng, eventInstance.Venue.LatLng);
+                }
+            }
+            return View(vm);
         }
 
         // GET: /AccomodationVenue/Create
@@ -58,19 +120,19 @@ namespace CosStay.Site.Controllers
         [Authorize]
         [Route("set-up/")]
         [ActionType(ActionType.Create)]
-        public async Task<ActionResult> Create([Bind(Include="Name,Address,AllowsBedSharing,AllowsMixedRooms")] AccomodationVenue accomodationvenue)
+        public async Task<ActionResult> Create([Bind(Include = "Name,Address,AllowsBedSharing,AllowsMixedRooms")] AccomodationVenue accomodationvenue)
         {
             await DenyIfNotAuthorizedAsync<AccomodationVenue>(ActionType.Create);
             if (ModelState.IsValid)
             {
                 var currentUser = await GetCurrentUserAsync();
-                
+
                 _es.Add(accomodationvenue);
-                
+
                 accomodationvenue.LatLng = new LatLng();
                 accomodationvenue.Owner = await _es.GetAsync<User>(currentUser.Id);
                 accomodationvenue.DateAdded = DateTimeOffset.Now;
-                
+
                 //db.Users.Attach(accomodationvenue.Owner);
                 //db.SaveChanges();
                 await _es.SaveAsync();
@@ -97,7 +159,7 @@ namespace CosStay.Site.Controllers
             }
 
             await DenyIfNotAuthorizedAsync(ActionType.Update, accomodationvenue);
-            var vm = GetViewModel(accomodationvenue);
+            var vm = GetExtendedViewModel(accomodationvenue);
 
             return View(vm);
         }
@@ -124,10 +186,10 @@ namespace CosStay.Site.Controllers
                     return View(accomodationVenueViewModel);
                 }*/
                 var dtoInstance = Mapper.Map<AccomodationVenueViewModel, AccomodationVenue>(accomodationVenueViewModel);
-                
-                
+
+
                 //instance.Rooms = dtoInstance.Rooms;
-                
+
 
                 /*// TODO: Check Authorisation based on venue
                 instance.Address = accomodationVenueViewModel.Address;
@@ -143,7 +205,7 @@ namespace CosStay.Site.Controllers
             }
 
             AccomodationVenue vmInstance = await _es.GetAsync<AccomodationVenue>(id);
-            return Json(GetViewModel(vmInstance));
+            return Json(GetExtendedViewModel(vmInstance));
         }
 
         // GET: /AccomodationVenue/Delete/5
@@ -182,7 +244,7 @@ namespace CosStay.Site.Controllers
             }
 
             await DenyIfNotAuthorizedAsync(ActionType.Delete, accomodationvenue);
-            
+
             _es.Delete(accomodationvenue);
             await _es.SaveAsync();
             return RedirectToAction("Index");
@@ -197,14 +259,25 @@ namespace CosStay.Site.Controllers
             base.Dispose(disposing);
         }
 
-        public AccomodationVenueViewModel GetViewModel(AccomodationVenue venue)
+        public AccomodationVenueViewModel GetExtendedViewModel(AccomodationVenue venue)
         {
             var vm = Mapper.Map<AccomodationVenueViewModel>(venue);
             vm.Rooms = vm.Rooms.Where(r => !r.IsDeleted).ToList();
 
-
+            if (vm.LatLng.HasValue)
+                vm.LatLng = _locationService.Approximate(vm.LatLng);
             vm.AvailableBedSizes = _es.GetAll<BedSize>().ToList();
             vm.AvailableBedTypes = _es.GetAll<BedType>().ToList();
+            return vm;
+        }
+        public AccomodationVenueViewModel GetBasicViewModel(AccomodationVenue venue)
+        {
+            var vm = Mapper.Map<AccomodationVenueViewModel>(venue);
+            vm.Rooms = null;
+            if (!string.IsNullOrWhiteSpace(venue.PublicAddress))
+                vm.Address = venue.PublicAddress;
+            if (vm.LatLng.HasValue)
+                vm.LatLng = _locationService.Approximate(vm.LatLng);
             return vm;
         }
     }

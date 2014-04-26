@@ -22,5 +22,11 @@ namespace CosStay.Core.Services.Impl
             
             return location;
         }
+
+        public LatLng Approximate(LatLng latlng)
+        {
+            double fuzz = 100;
+            return new LatLng(Math.Round(latlng.Lat.Value * fuzz) / fuzz, Math.Round(latlng.Lng.Value * fuzz) / fuzz);
+        }
     }
 }
