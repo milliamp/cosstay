@@ -365,7 +365,7 @@
     <Content Include="Views\AccomodationVenue\Create.cshtml" />
     <Content Include="Views\AccomodationVenue\Delete.cshtml" />
     <Content Include="Views\AccomodationVenue\Details.cshtml" />
-    <Content Include="Views\AccomodationVenue\Edit.cshtml" />
+    <Content Include="Views\AccomodationVenue\Setup.cshtml" />
     <Content Include="Views\AccomodationVenue\Index.cshtml" />
     <Content Include="Views\Account\_ExternalUserPropertiesListPartial.cshtml" />
     <Content Include="Views\Account\_UserPropertiesListPartial.cshtml" />
@@ -373,6 +373,7 @@
     <Content Include="Views\Event\Create.cshtml" />
     <Content Include="Views\Page\Edit.cshtml" />
     <Content Include="Views\Event\UpdateFromFacebook.cshtml" />
+    <Content Include="Views\AccomodationVenue\Edit.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

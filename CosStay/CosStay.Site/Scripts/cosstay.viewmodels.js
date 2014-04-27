@@ -13,6 +13,7 @@
             data: {
                 q: root.searchTerm(),
                 l: root.locationId(),
+                e: root.eventId(),
                 start:params.startIndex, 
                 limit:params.limit
             },
@@ -25,22 +26,19 @@
         });
     };
 
-    this.items = ko.observableArray([]).extend({
+    this.items = ko.observableArray([]);
+    this.itemSource = this.items.extend({
         datasource: this.getAccomodationVenues,
         pager: {
             limit: 10
         }
     });
     this.searchTerm = ko.observable("");
+    this.eventId = ko.observable(0);
 
     this.locationId = ko.observable(0);
     this.location = ko.observable("All cities");
 };
-
-
-
-
-
 
 var accomodationVenueViewModel = function (data) {
     this.$type = 'accomodationVenueViewModel';

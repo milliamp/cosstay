@@ -4,56 +4,42 @@
     ViewBag.Title = "Details";
 }
 
-<h2>@Model.Name</h2>
-<h3><a href="@Model.Url">@Model.Url</a></h3>
-<div>
-    
-	<hr />
-    <div class="col-md-6">
-        <p>@Model.Description</p>
-        <dl class="dl-horizontal">
-            <dt>
-                @Html.DisplayNameFor(model => model.StartDate)
-            </dt>
+<div class="event-details row well-lg">
+    <div class="col-lg-3 col-md-3 col-sm-4 hidden-xs">
+        <img src="@Model.MainImageUrl" style="width:100%;" />
+    </div>
+    <div class="col-lg-5 col-md-5 col-sm-8 col-xs-10">
+        <h2>
+            @Model.Name
+        </h2>
+        @if (Model.CurrentUserAttending)
+        {<span class="label label-success" style="float:right">Attending</span>}
+        <p>
 
-            <dd>
-                @Html.DisplayFor(model => model.StartDate)
-            </dd>
+            <i class="glyphicon glyphicon-calendar"></i>
+            @Model.StartDate.ToString("MMMM dd") @if (Model.StartDate.Date != Model.EndDate.Date)
+            {<text>
+                - @Model.EndDate.ToString("MMMM dd")
+            </text>}<br />
 
-            <dt>
-                @Html.DisplayNameFor(model => model.EndDate)
-            </dt>
-
-            <dd>
-                @Html.DisplayFor(model => model.EndDate)
-            </dd>
-
-            <dt>
-                @Html.DisplayNameFor(model => model.DateUpdated)
-            </dt>
-
-            <dd>
-                @Html.DisplayFor(model => model.DateUpdated)
-            </dd>
-
-            <dt>
-                @Html.DisplayNameFor(model => model.VenueName)
-            </dt>
-
-            <dd>
-                @Html.DisplayFor(model => model.VenueName)
-            </dd>
-
-        </dl>
-
-        <p>Attending? @Model.CurrentUserAttending</p>
-        <p>@Model.FriendsAttending</p>
+            <i class="glyphicon glyphicon-time"></i>
+            Starts at @Model.StartDate.ToShortTimeString(). Ends at @Model.EndDate.ToShortTimeString().
+        </p>
 
         <p>
-            @Html.ActionLink("Back to List", "Index")
+            <i class="glyphicon glyphicon-map-marker"></i>
+            @Model.VenueName
+        </p>
+        <p>
+            <i class="glyphicon glyphicon-user"></i>
+            @Model.FriendsAttending
+        </p>
+        <p>
+            <i class="glyphicon glyphicon-link"></i>
+            <a href="@Model.Url">Website</a>
         </p>
     </div>
-    <div class="col-md-6">
+    <div class="col-lg-4 col-md-4 hidden-sm hidden-xs">
         <div id="mini-clndr">
             <script id="mini-clndr-template" type="text/template">
 
@@ -72,12 +58,136 @@
 
             </script>
         </div>
+    </div>
+</div>
+<div>
+
+    <hr />
+    <div class="col-md-7">
+
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-md-5">
+
+                        <div class="input-group">
+                            <label class="sr-only" for="search">Search</label>
+                            <div class="input-group-btn">
+                                Location<!--
+                                <button type="button" class="btn btn-default dropdown-toggle" style="width: 100px;" data-toggle="dropdown"><span data-bind="text:location"></span> <span class="caret"></span></button>
+                                <ul class="dropdown-menu">
+                                    <li><a href="#" data-bind="click:function () {locationId(0); location('All cities')}">All cities</a></li>
+                                </ul>-->
+                            </div><!-- /btn-group -->
+
+                            <input id="search" type="search" class="form-control" placeholder="Search" data-bind="value:searchTerm">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">Go!</button>
+                            </span>
+                        </div><!-- /input-group -->
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayColumnNameFor(new CosStay.Site.Models.AccomodationVenueViewModel(), model => model.Name)
+                            </th>
+                            <th>
+                                @Html.DisplayColumnNameFor(new CosStay.Site.Models.AccomodationVenueViewModel(), model => model.Address)
+                            </th>
+                            <th>
+                                @Html.DisplayColumnNameFor(new CosStay.Site.Models.AccomodationVenueViewModel(), model => model.BedAvailability)
+                            </th>
+                            <th>
+                                @Html.DisplayColumnNameFor(new CosStay.Site.Models.AccomodationVenueViewModel(), model => model.AllowsBedSharing)
+                            </th>
+                            <th>
+                                @Html.DisplayColumnNameFor(new CosStay.Site.Models.AccomodationVenueViewModel(), model => model.AllowsMixedRooms)
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: itemSource">
+                        <tr>
+                            <td><a href="" data-bind="text:Name, attr: { href: '/accomodation/' + Id }"></a></td>
+                            <td data-bind="text:Address"></td>
+                            <td data-bind="text:BedAvailability"></td>
+                            <td data-bind="text:AllowsBedSharing"></td>
+                            <td data-bind="text:AllowsMixedRooms"></td>
+                            <td>
+                                @*@Html.TrimmedActionLink("Edit", "Edit", item, new { id = item.Id }, true) |
+                                @Html.TrimmedActionLink("Details", "Details", item, new { id = item.Id, name = item.Name }, true) |
+                                @Html.TrimmedActionLink("Delete", "Delete", item, new { id = item.Id }, true)*@
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <script>
+            var viewModel = new accomodationVenueSearchViewModel();
+            viewModel.eventId(@Model.EventInstanceId);
+            ko.applyBindings(viewModel);
+            var markers = {};
+            viewModel.items.subscribe(function(changes) {
+                changes.forEach(function(change) {
+                    var item = change.value;
+                    if (item.LatLng.Lat == null || item.LatLng.Lng == null)
+                        return;
+
+                    if (change.status === 'added') {
+                        item.marker = new google.maps.Marker({
+                            position: new google.maps.LatLng(item.LatLng.Lat, item.LatLng.Lng),
+                            map: map,
+                            title: item.Name
+                        });
+                    }
+                    if (change.status === 'deleted') {
+                        if (item.marker)
+                        {
+                            item.marker.setMap(null);
+                            delete item.marker;
+
+                        }
+                    }
+
+                    var bounds = new google.maps.LatLngBounds();
+                    bounds.extend(venueMarker.getPosition());
+                    //  Go through each...
+                    var items = viewModel.items();
+                    for (var mark in items)
+                    {
+                        //  And increase the bounds to take this point
+                        if (items[mark].marker)
+                            bounds.extend (items[mark].marker.getPosition());
+                    }
+                    //  Fit these bounds to the map
+                    map.fitBounds(bounds);
+                    var zoom = map.getZoom();
+                    map.setZoom(zoom > 16 ? 16 : zoom);
+                });
+
+            }, null, "arrayChange");
+        </script>
+
+        <p>
+            @Html.ActionLink("Back to List", "Index")
+        </p>
+    </div>
+    <div class="col-md-5">
+
         <div id="map-canvas" style="height:400px">
 
         </div>
-        
+
     </div>
 
+
+    Last updated @Model.DateUpdated.ToLocalTime()
 </div>
 
 @section Scripts
@@ -85,46 +195,51 @@
     <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
     <script src="~/Scripts/moment.min.js"></script>
     <script src="~/Scripts/clndr.min.js"></script>
-<script type="text/javascript"
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB21AFsFMbmFCkYKe7ZrBN46p7Rop-twLY&sensor=false">
-</script>
-    @if(Model.VenueLatLng != null){
-<script type="text/javascript">
-    function initialize() {
-        var mapOptions = {
-            center: new google.maps.LatLng(@Model.VenueLatLng.Lat , @Model.VenueLatLng.Lng),
-            zoom: 16
-        };
+    <script type="text/javascript"
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB21AFsFMbmFCkYKe7ZrBN46p7Rop-twLY&sensor=false">
+    </script>
+    @if (Model.VenueLatLng != null)
+    {
+        <script type="text/javascript">
+            var map;
+            var venueMarker;
+            function initialize() {
+                var mapOptions = {
+                    center: new google.maps.LatLng(@Model.VenueLatLng.Lat , @Model.VenueLatLng.Lng),
+                    zoom: 16
+                };
 
-        var map = new google.maps.Map(document.getElementById("map-canvas"),
-            mapOptions);
-
-        var accomodationMarker = new google.maps.Marker({
-            position: new google.maps.LatLng(@Model.VenueLatLng.Lat , @Model.VenueLatLng.Lng),
-            map: map,
-            title:"@Model.Name.Replace("\"", "\\\"")"
-        })
+                map = new google.maps.Map(document.getElementById("map-canvas"),
+                    mapOptions);
+                
+                venueMarker = new google.maps.Marker({
+                    position: new google.maps.LatLng(@Model.VenueLatLng.Lat , @Model.VenueLatLng.Lng),
+                    map: map,
+                    title:"@Model.Name.Replace("\"", "\\\"")"
+                })
+            }
+            google.maps.event.addDomListener(window, 'load', initialize);
+        </script>
     }
-    google.maps.event.addDomListener(window, 'load', initialize);
-</script>
-    }
+    
+<script src="~/Scripts/cosstay.viewmodels.js"></script>
     <script>
         $(function () {
             var events = [
-  { startDate: '@Model.StartDate.ToString("yyyy-MM-dd")', endDate: '@Model.EndDate.ToString("yyyy-MM-dd")', title: '@Model.Name', location: '@Model.Location' }
+                { startDate: '@Model.StartDate.ToString("yyyy-MM-dd")', endDate: '@Model.EndDate.ToString("yyyy-MM-dd")', title: '@Model.Name', location: '@Model.Location' }
             ];
             var cal = $('#mini-clndr').clndr({
                 template: $('#mini-clndr-template').html(),
-                events: events,  
+                events: events,
                 multiDayEvents: {
                     startDate: 'startDate',
                     endDate: 'endDate'
                 },
-
+                forceSixRows: true,
                 adjacentDaysChangeMonth: false,
                 startWithMonth: events[0].startDate
             });
 
         });
-  </script>
+    </script>
 }

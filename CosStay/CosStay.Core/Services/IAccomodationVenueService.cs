@@ -10,5 +10,6 @@ namespace CosStay.Core.Services
     public interface IAccomodationVenueService
     {
         Task<Model.AccomodationVenue> UpdateVenueAsync(AccomodationVenue venue);
+        Task<IQueryable<VenueAvailabilitySearchResult>> AvailableVenuesQueryAsync(int eventInstanceId);
     }
 }

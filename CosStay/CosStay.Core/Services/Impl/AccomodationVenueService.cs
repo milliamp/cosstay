@@ -14,6 +14,36 @@ namespace CosStay.Core.Services.Impl
         {
             _es = entityStore;
         }
+        public const int DAYS_BEFORE_EVENT_AVAILABILITY_CHECK = 1;
+        public const int DAYS_AFTER_EVENT_AVAILABILITY_CHECK = 1;
+        public async Task<IQueryable<VenueAvailabilitySearchResult>> AvailableVenuesQueryAsync(int eventInstanceId)
+        {
+            var days = new List<DateTimeOffset>();
+            var eventInstance = await _es.GetAsync<EventInstance>(eventInstanceId, ev=> ev.Venue.Location);
+            if (eventInstance == null)
+                return null;
+
+            var eventStartDate = eventInstance.StartDate.Date;
+            var eventEndDate = eventInstance.EndDate.Date;
+            var startDate = eventStartDate.AddDays(-DAYS_BEFORE_EVENT_AVAILABILITY_CHECK);
+            var endDate = eventEndDate.AddDays(DAYS_AFTER_EVENT_AVAILABILITY_CHECK);
+            
+            var query = _es.GetAll<AccomodationBedAvailabilityNight>()
+                .Where(an => an.Night >=startDate && an.Night <= endDate && (an.BedStatus == BedStatus.Available || an.BedStatus == BedStatus.Tentative))
+                .GroupBy(an => an.Bed.Room.Venue)
+                .Select(g => new VenueAvailabilitySearchResult
+                {
+                    Venue = g.Key,
+                    Nights = g.Select(z => z)
+                })
+                // Only in the same location as event
+                .Where(sr => sr.Venue.Location.Id == eventInstance.Venue.Location.Id)
+                // Only when the nights the venue is available actually includes at least 1 event day
+                .Where(sr => sr.Nights.Any(n => n.Night >= eventStartDate && n.Night <= eventEndDate));
+
+            return query;
+        }
+
         public async Task<Model.AccomodationVenue> UpdateVenueAsync(Model.AccomodationVenue dtoInstance)
         {
             AccomodationVenue instance = await _es.GetAsync<AccomodationVenue>(dtoInstance.Id);

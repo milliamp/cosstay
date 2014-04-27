@@ -12,7 +12,7 @@ namespace CosStay.Core.Services
     {
         IQueryable<TEntity> Query<TEntity>() where TEntity : class;
         Task<TEntity> GetAsync<TEntity>(object pk) where TEntity : class;
-        Task<TEntity> GetAsync<TEntity, TProperty>(object pk, params Expression<Func<TEntity, TProperty>>[] paths) where TEntity : class;
+        Task<TEntity> GetAsync<TEntity>(object pk, params Expression<Func<TEntity, object>>[] paths) where TEntity : class;
         
         IQueryable<TEntity> GetAll<TEntity>() where TEntity : class;
         void Add<TEntity>(TEntity entity) where TEntity : class, IAddable;

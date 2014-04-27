@@ -32,13 +32,13 @@ namespace CosStay.Core.Services.Impl
         
         public async Task<TEntity> GetAsync<TEntity>(object pk) where TEntity : class
         {
-            var query = GetByKeyExpression<TEntity, object>(pk);
+            var query = GetByKeyExpression<TEntity>(pk);
             return await query.SingleOrDefaultAsync();
         }
 
-        public async Task<TEntity> GetAsync<TEntity,TProperty>(object pk, params Expression<Func<TEntity, TProperty>>[] paths) where TEntity : class
+        public async Task<TEntity> GetAsync<TEntity>(object pk, params Expression<Func<TEntity, object>>[] paths) where TEntity : class
         {
-            var query = GetByKeyExpression<TEntity, TProperty>(pk, paths);
+            var query = GetByKeyExpression<TEntity>(pk, paths);
             return await query.SingleOrDefaultAsync();
         }
 
@@ -55,22 +55,14 @@ namespace CosStay.Core.Services.Impl
             return query.SingleOrDefault();
         }*/
 
-        protected IQueryable<TEntity> GetByKeyExpression<TEntity,TProperty>(object key, params Expression<Func<TEntity, TProperty>>[] paths) where TEntity : class
+        protected IQueryable<TEntity> GetByKeyExpression<TEntity>(object key, params Expression<Func<TEntity, object>>[] paths) where TEntity : class
         {
             var checkType = typeof(TEntity);
             var set = _db.Set<TEntity>();
             IQueryable<TEntity> query = set;
             foreach (var path in paths)
             {
-                var memberExpression = path.Body as MemberExpression;
-                var propInfo = memberExpression.Member as PropertyInfo;
-                if (!propInfo.ReflectedType.IsAssignableFrom(checkType))
-                    throw new ArgumentException(string.Format(
-                        "Expresion '{0}' refers to a property that is not from type {1}.",
-                        path.ToString(),
-                        checkType));
-
-                query = query.Include(propInfo.Name);
+                query = query.Include(path);
             }
             var keyProperty = _db.KeyForEntity(checkType);
             var paramIn = Expression.Parameter(checkType, "p");

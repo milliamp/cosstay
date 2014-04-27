@@ -48,6 +48,9 @@ namespace CosStay.Site.Models
         [Display(Name = "Number of Beds")]
         public int TotalBeds { get; set; }
 
+        [Display(Name = "Beds available")]
+        public string BedAvailability { get; set; }
+
         public Dictionary<EventInstance, TravelInfo> TravelInfo { get; set; }
 
         public List<BedSize> AvailableBedSizes { get; set; }

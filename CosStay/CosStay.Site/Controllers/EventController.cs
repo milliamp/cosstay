@@ -131,7 +131,7 @@ namespace CosStay.Site.Controllers
                 }
 
             }
-            catch (FacebookApiException)
+            catch (Exception)
             {
 
             }

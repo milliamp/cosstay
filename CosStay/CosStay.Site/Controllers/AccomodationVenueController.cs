@@ -36,33 +36,41 @@ namespace CosStay.Site.Controllers
         }
 
         // GET: /AccomodationVenue/
-        public async Task<ActionResult> Index(string q, int l = 0, int start = 0, int limit = int.MaxValue, bool json = false)
+        public async Task<ActionResult> Index(string q, int l = 0, int e = 0, int start = 0, int limit = int.MaxValue, bool json = false)
         {
             var list = new List<AccomodationVenueViewModel>();
             var totalResults = 0;
 
             if (Request.IsAjaxRequest() || json)
             {
-                var query = _es.GetAll<AccomodationVenue>().IncludePaths(v => v.Owner);
+                IQueryable<VenueAvailabilitySearchResult> query;
 
+                // TODO: Need to expose viewmodel with availability in it.
+                if (e > 0)
+                    query = await _accomodationVenueService.AvailableVenuesQueryAsync(e);
+                else
+                    query = _es.GetAll<AccomodationVenue>().IncludePaths(v => v.Owner).Select(v => new VenueAvailabilitySearchResult() {
+                        Venue = v
+                    });
+                
                 if (!string.IsNullOrWhiteSpace(q))
                 {
-                    query = query.Where(v =>
-                        v.Name.Contains(q)
-                        || v.PublicAddress.Contains(q)
-                        || v.Location.Name.Contains(q)
-                        || v.Rooms.Any(r => r.Description.Contains(q))
-                        || v.Rooms.Any(r => r.Name.Contains(q)));
+                    query = query.Where(vsr =>
+                        vsr.Venue.Name.Contains(q)
+                        || vsr.Venue.PublicAddress.Contains(q)
+                        || vsr.Venue.Location.Name.Contains(q)
+                        || vsr.Venue.Rooms.Any(r => r.Description.Contains(q))
+                        || vsr.Venue.Rooms.Any(r => r.Name.Contains(q)));
                 }
                 if (l > 0)
-                    query = query.Where(v => v.Location.Id == l);
+                    query = query.Where(vsr => vsr.Venue.Location.Id == l);
 
                 var dataList = await query.ToAsyncList();
                 dataList = dataList.Where(v => _auth.IsAuthorizedTo(ActionType.Read, v)).ToList();
                 totalResults = dataList.Count;
                 list = dataList.Skip(start)
                     .Take(limit)
-                    .Select(v => GetBasicViewModel(v))
+                    .Select(vsr => GetSearchViewModel(vsr))
                     .ToList();
 
                 return Json(new
@@ -142,11 +150,31 @@ namespace CosStay.Site.Controllers
             return View(accomodationvenue);
         }
 
-        // GET: /AccomodationVenue/Edit/5
         [Route("edit/{id:int}")]
         [Authorize]
         [ActionType(ActionType.Update)]
         public async Task<ActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            AccomodationVenue accomodationvenue = await _es.GetAsync<AccomodationVenue>(id.Value);
+            if (accomodationvenue == null)
+            {
+                return HttpNotFound();
+            }
+
+            await DenyIfNotAuthorizedAsync(ActionType.Update, accomodationvenue);
+            var vm = GetExtendedViewModel(accomodationvenue);
+
+            return View(vm);
+        }
+
+        [Route("setup/{id:int}")]
+        [Authorize]
+        [ActionType(ActionType.Update)]
+        public async Task<ActionResult> Setup(int? id)
         {
             if (id == null)
             {
@@ -169,6 +197,28 @@ namespace CosStay.Site.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateJsonAntiForgeryToken]
+        [Route("setup/{id:int}")]
+        [Authorize]
+        [ActionType(ActionType.Update)]
+        public async Task<JsonResult> Setup(int id, AccomodationVenueViewModel accomodationVenueViewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                AccomodationVenue instance = await _es.GetAsync<AccomodationVenue>(id);
+
+                await DenyIfNotAuthorizedAsync(ActionType.Update, instance);
+
+                var dtoInstance = Mapper.Map<AccomodationVenueViewModel, AccomodationVenue>(accomodationVenueViewModel);
+
+                await _accomodationVenueService.UpdateVenueAsync(dtoInstance);
+            }
+
+            AccomodationVenue vmInstance = await _es.GetAsync<AccomodationVenue>(id);
+            return Json(GetExtendedViewModel(vmInstance));
+        }
+
+        [HttpPost]
+        [ValidateJsonAntiForgeryToken]
         [Route("edit/{id:int}")]
         [Authorize]
         [ActionType(ActionType.Update)]
@@ -180,28 +230,9 @@ namespace CosStay.Site.Controllers
 
                 await DenyIfNotAuthorizedAsync(ActionType.Update, instance);
 
-                /*if (instance.Owner.Id != CurrentUser.Id)
-                {
-                    ModelState.AddModelError("Access Denied", new HttpException(403, "Access Denied"));
-                    return View(accomodationVenueViewModel);
-                }*/
                 var dtoInstance = Mapper.Map<AccomodationVenueViewModel, AccomodationVenue>(accomodationVenueViewModel);
 
-
-                //instance.Rooms = dtoInstance.Rooms;
-
-
-                /*// TODO: Check Authorisation based on venue
-                instance.Address = accomodationVenueViewModel.Address;
-                instance.AllowsBedSharing = accomodationVenueViewModel.AllowsBedSharing;
-                instance.AllowsMixedRooms = accomodationVenueViewModel.AllowsMixedRooms;
-                instance.Features = accomodationVenueViewModel.Features;
-                instance.LatLng = accomodationVenueViewModel.LatLng ?? new LatLng(0,0);
-                instance.Location = accomodationVenueViewModel.Location;
-                instance.Photos = accomodationVenueViewModel.Photos;
-                // TODO: Rooms merge
-                //instance.Rooms = accomodationVenueViewModel.Rooms.sel;*/
-                await _accomodationVenueService.UpdateVenueAsync(dtoInstance);
+                //await _accomodationVenueService.UpdateBedAvailability(dtoInstance);
             }
 
             AccomodationVenue vmInstance = await _es.GetAsync<AccomodationVenue>(id);
@@ -278,6 +309,40 @@ namespace CosStay.Site.Controllers
                 vm.Address = venue.PublicAddress;
             if (vm.LatLng.HasValue)
                 vm.LatLng = _locationService.Approximate(vm.LatLng);
+            return vm;
+        }
+        public AccomodationVenueViewModel GetSearchViewModel(VenueAvailabilitySearchResult searchResult)
+        {
+            var vm = Mapper.Map<AccomodationVenueViewModel>(searchResult.Venue);
+            vm.Rooms = null;
+            if (!string.IsNullOrWhiteSpace(searchResult.Venue.PublicAddress))
+                vm.Address = searchResult.Venue.PublicAddress;
+            if (vm.LatLng.HasValue)
+                vm.LatLng = _locationService.Approximate(vm.LatLng);
+
+            var groups = searchResult.Nights.GroupBy(n => n.Bed).Select(g => new { Bed = g.Key, Nights = g.Select(z => z.Night) });
+
+            var bedAvailabilityGroups = new List<Tuple<List<Bed>, List<DateTimeOffset>>>();
+            foreach (var bed in groups)
+            {
+                var existing = bedAvailabilityGroups.FirstOrDefault(g => g.Item2.SequenceEqual(bed.Nights));
+                if (existing == null)
+                {
+                    existing = new Tuple<List<Bed>, List<DateTimeOffset>>(new List<Bed>(), bed.Nights.OrderBy(n => n).ToList());
+                    bedAvailabilityGroups.Add(existing);
+                }
+                existing.Item1.Add(bed.Bed);
+            }
+
+            var bedAvailabilityStrings = new List<string>();
+            foreach (var bedGroups in bedAvailabilityGroups)
+            {
+                bedAvailabilityStrings.Add(string.Format("{0} bed{1} available {2}", 
+                    bedGroups.Item1.Count(), 
+                    bedGroups.Item1.Count() != 1 ? "s" : "", 
+                    string.Join(", ", bedGroups.Item2.Select(n => n.ToString("dddd")))));
+            }
+            vm.BedAvailability = string.Join(". ", bedAvailabilityStrings);
             return vm;
         }
     }

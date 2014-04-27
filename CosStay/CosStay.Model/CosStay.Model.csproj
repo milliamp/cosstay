@@ -66,6 +66,7 @@
     <Compile Include="CosStayContext.cs" />
     <Compile Include="CosStayDataIntegrityModel.cs" />
     <Compile Include="CosStayModel.cs" />
+    <Compile Include="CosstayOtherEntities.cs" />
     <Compile Include="CosStaySecurityModel.cs" />
     <Compile Include="IAddable.cs" />
     <Compile Include="IAuditable.cs" />
@@ -92,6 +93,14 @@
     <Compile Include="Migrations\201404261047408_Multi-Features.cs" />
     <Compile Include="Migrations\201404261047408_Multi-Features.Designer.cs">
       <DependentUpon>201404261047408_Multi-Features.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201404270726070_Interests.cs" />
+    <Compile Include="Migrations\201404270726070_Interests.Designer.cs">
+      <DependentUpon>201404270726070_Interests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201404270739032_Interests1.cs" />
+    <Compile Include="Migrations\201404270739032_Interests1.Designer.cs">
+      <DependentUpon>201404270739032_Interests1.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="MissingDllHack.cs" />
@@ -121,6 +130,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201404261047408_Multi-Features.resx">
       <DependentUpon>201404261047408_Multi-Features.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201404270726070_Interests.resx">
+      <DependentUpon>201404270726070_Interests.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201404270739032_Interests1.resx">
+      <DependentUpon>201404270739032_Interests1.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

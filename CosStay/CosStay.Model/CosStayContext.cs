@@ -261,6 +261,8 @@ namespace CosStay.Model
 
         public DbSet<SeedData> SeedData { get; set; }
 
+        public DbSet<Interest> Interests { get; set; }
+        public DbSet<InterestCategory> InterestCategories { get; set; }
 
         public virtual IDbSet<User> Users
         {

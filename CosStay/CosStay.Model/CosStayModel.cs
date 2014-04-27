@@ -58,28 +58,6 @@ namespace CosStay.Model
         public virtual Country Country { get; set; }
     }
 
-    public class TravelInfo
-    {
-        public virtual LatLng From { get; set; }
-        public virtual LatLng To { get; set; }
-        public virtual List<TravelCost> TravelCosts { get; set; }
-    }
-    public class TravelCost
-    {
-        public virtual TravelMethod Method { get; set; }
-        public decimal? Distance { get; set; }
-        public decimal? Price { get; set; }
-    }
-    public enum TravelMethod
-    {
-        Direct,
-        Walking,
-        Cycling,
-        Driving,
-        PublicTransport,
-        Taxi
-    };
-
     public class Venue : NamedEntity, IAddable, IDeletable, IAuditable
     {
         public virtual LatLng LatLng { get; set; }
@@ -118,6 +96,17 @@ namespace CosStay.Model
         public string ShortName { get; set; }
     }
 
+    public class Interest : NamedEntity, IAddable, IAuditable
+    {
+        public virtual InterestCategory Category { get; set; }
+        public virtual List<User> Users { get; set; }
+    }
+    public class InterestCategory : NamedEntity
+    {
+        public string Icon { get; set; }
+        public virtual List<Interest> Interests { get; set; }
+    }
+
     public class User : IUser<string>, IAddable, IDeletable, IAuditable
     {
         public string Name { get; set; }
@@ -133,6 +122,8 @@ namespace CosStay.Model
 
         //public virtual List<Role> Roles { get; set; }
         public virtual List<ContactMethod> ContactMethods { get; set; }
+
+        public virtual List<Interest> Interests { get; set; }
 
         // From AspNet.Identity.EntityFramework
         // Summary:

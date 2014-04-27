@@ -27,9 +27,12 @@
             </p>
 
         </div>
-
+        <span class="calendar-badge">
+            <span class="calendar-badge-month">@item.StartDate.ToString("MMM")</span>
+            <span class="calendar-badge-day">@item.StartDate.ToString("dd")</span>
+        </span>
         <p>
-            @Html.TrimmedActionLink("Edit", "Edit", item, new { id = item.Id })
+            @Html.TrimmedActionLink(" ", "Edit", item, new { id = item.Id }, new { @class = "edit-action" })
         </p>
 </section>
 }
