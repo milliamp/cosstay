@@ -102,6 +102,38 @@
     <Compile Include="Migrations\201404270739032_Interests1.Designer.cs">
       <DependentUpon>201404270739032_Interests1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201405091216539_ExpandingUserInterests.cs" />
+    <Compile Include="Migrations\201405091216539_ExpandingUserInterests.Designer.cs">
+      <DependentUpon>201405091216539_ExpandingUserInterests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201405091222005_ExpandingUserInterestsImages.cs" />
+    <Compile Include="Migrations\201405091222005_ExpandingUserInterestsImages.Designer.cs">
+      <DependentUpon>201405091222005_ExpandingUserInterestsImages.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201405110532009_ExpandingUserInterestsImagesAgain.cs" />
+    <Compile Include="Migrations\201405110532009_ExpandingUserInterestsImagesAgain.Designer.cs">
+      <DependentUpon>201405110532009_ExpandingUserInterestsImagesAgain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201405130943311_AddResidents.cs" />
+    <Compile Include="Migrations\201405130943311_AddResidents.Designer.cs">
+      <DependentUpon>201405130943311_AddResidents.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201405140922563_AddResidents2.cs" />
+    <Compile Include="Migrations\201405140922563_AddResidents2.Designer.cs">
+      <DependentUpon>201405140922563_AddResidents2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201405241215222_PhotoReferences.cs" />
+    <Compile Include="Migrations\201405241215222_PhotoReferences.Designer.cs">
+      <DependentUpon>201405241215222_PhotoReferences.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201405241230277_PhotoReferencesWtf.cs" />
+    <Compile Include="Migrations\201405241230277_PhotoReferencesWtf.Designer.cs">
+      <DependentUpon>201405241230277_PhotoReferencesWtf.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201405241244131_PhotoReferencesWtf1.cs" />
+    <Compile Include="Migrations\201405241244131_PhotoReferencesWtf1.Designer.cs">
+      <DependentUpon>201405241244131_PhotoReferencesWtf1.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="MissingDllHack.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -136,6 +168,30 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201404270739032_Interests1.resx">
       <DependentUpon>201404270739032_Interests1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201405091216539_ExpandingUserInterests.resx">
+      <DependentUpon>201405091216539_ExpandingUserInterests.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201405091222005_ExpandingUserInterestsImages.resx">
+      <DependentUpon>201405091222005_ExpandingUserInterestsImages.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201405110532009_ExpandingUserInterestsImagesAgain.resx">
+      <DependentUpon>201405110532009_ExpandingUserInterestsImagesAgain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201405130943311_AddResidents.resx">
+      <DependentUpon>201405130943311_AddResidents.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201405140922563_AddResidents2.resx">
+      <DependentUpon>201405140922563_AddResidents2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201405241215222_PhotoReferences.resx">
+      <DependentUpon>201405241215222_PhotoReferences.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201405241230277_PhotoReferencesWtf.resx">
+      <DependentUpon>201405241230277_PhotoReferencesWtf.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201405241244131_PhotoReferencesWtf1.resx">
+      <DependentUpon>201405241244131_PhotoReferencesWtf1.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

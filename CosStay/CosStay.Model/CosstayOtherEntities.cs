@@ -33,4 +33,12 @@ namespace CosStay.Model
         public virtual AccomodationVenue Venue { get; set; }
         public virtual IEnumerable<AccomodationBedAvailabilityNight> Nights { get; set; }
     }
+
+    public class BedAvailabilitySearchResult
+    {
+        public virtual Bed Bed { get; set; }
+        public virtual IEnumerable<AccomodationBedAvailabilityNight> Nights { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+    }
 }

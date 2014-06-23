@@ -89,23 +89,46 @@ namespace CosStay.Site.Controllers
         {
             var instance = await ValidateDetailsAsync<AccomodationVenue>(_es, id, name);
             await DenyIfNotAuthorizedAsync(ActionType.Read, instance);
-            var vm = GetExtendedViewModel(instance);
 
-            if (vm.LatLng.HasValue)
+            var fullInstance = _es.GetAll<AccomodationVenue>()
+                .IncludePaths(
+                    v => v.CoverImage,
+                    v => v.Residents,
+                    v => v.Rooms,
+                    v => v.Location,
+                    v => v.Rooms.Select(r => r.Beds),
+                    v => v.Rooms.Select(r => r.Features),
+                    v => v.Rooms.Select(r => r.Photos),
+                    v => v.Rooms.Select(r => r.Beds.Select(b => b.BedSize)),
+                    v => v.Rooms.Select(r => r.Beds.Select(b => b.BedType)),
+                    v => v.Rooms.Select(r => r.Beds.Select(b => b.Photos)))
+                .Single(v => v.Id == id);
+            var vm = GetExtendedViewModel(fullInstance);
+
+            // TODO: Move to EventService
+            var eventsQuery = _es.GetAll<EventInstance>()
+                .IncludePaths(
+                    e => e.Venue,
+                    e => e.Venue.Location,
+                    e => e.Photos,
+                    e => e.Event,
+                    e => e.Event.Photos
+                )
+                .Where(e => e.StartDate > _dateTimeService.Now);
+            
+            if (instance.Location != null)
+                eventsQuery = eventsQuery.Where(e => e.Venue.Location.Id == instance.Location.Id);
+
+            var events = await eventsQuery.ToAsyncList();
+
+            vm.TravelInfo = new Dictionary<EventInstance, TravelInfo>();
+            vm.AvailabilityViewModel = new Dictionary<EventInstance, AccomodationRoomAvailabilityViewModel>();
+            foreach (var eventInstance in events)
             {
-                // TODO: Move to EventService
-                var events = await _es.GetAll<EventInstance>()
-                    .Where(e => e.StartDate > _dateTimeService.Now)
-                    .Where(e => e.Venue.Location.Id == instance.Location.Id)
-                    .ToAsyncList();
-
-                vm.TravelInfo = new Dictionary<EventInstance, TravelInfo>();
-                foreach (var eventInstance in events)
-                {
-                    if (eventInstance.Venue == null || !eventInstance.Venue.LatLng.HasValue)
-                        continue;
-                    vm.TravelInfo[eventInstance] = _travelService.CalculateTravelInfo(vm.LatLng, eventInstance.Venue.LatLng);
-                }
+                vm.AvailabilityViewModel[eventInstance] = await GetAvailabilityViewModel(id, eventInstance.Id);
+                if (eventInstance.Venue == null || !eventInstance.Venue.LatLng.HasValue || !vm.LatLng.HasValue)
+                    continue;
+                vm.TravelInfo[eventInstance] = _travelService.CalculateTravelInfo(vm.LatLng, eventInstance.Venue.LatLng);
             }
             return View(vm);
         }
@@ -290,6 +313,7 @@ namespace CosStay.Site.Controllers
             base.Dispose(disposing);
         }
 
+        // TODO: Can we get this async to stop 2 concurrent blocking calls?
         public AccomodationVenueViewModel GetExtendedViewModel(AccomodationVenue venue)
         {
             var vm = Mapper.Map<AccomodationVenueViewModel>(venue);
@@ -301,6 +325,7 @@ namespace CosStay.Site.Controllers
             vm.AvailableBedTypes = _es.GetAll<BedType>().ToList();
             return vm;
         }
+
         public AccomodationVenueViewModel GetBasicViewModel(AccomodationVenue venue)
         {
             var vm = Mapper.Map<AccomodationVenueViewModel>(venue);
@@ -309,6 +334,46 @@ namespace CosStay.Site.Controllers
                 vm.Address = venue.PublicAddress;
             if (vm.LatLng.HasValue)
                 vm.LatLng = _locationService.Approximate(vm.LatLng);
+            return vm;
+        }
+        public async Task<AccomodationRoomAvailabilityViewModel> GetAvailabilityViewModel(int venueId, int eventInstanceId)
+        {
+            var availableBeds = await _accomodationVenueService.AvailableBedsQueryAsync(venueId, eventInstanceId);
+            var venueInstance = await _es.GetAsync<AccomodationVenue>(venueId);
+            var beds = new List<BedAvailabilityViewModel>();
+            var list = await availableBeds.ToAsyncList();
+            foreach (var night in list)
+            {
+                var bed = Mapper.Map<BedAvailabilityViewModel>(night.Bed);
+                bed.Nights = new List<Tuple<DateTime, BedStatus>>();
+                foreach (var bedNight in night.Nights)
+                {
+                    bed.Nights.Add(new Tuple<DateTime,BedStatus>(bedNight.Night.DateTime, bedNight.BedStatus));
+                }
+
+                beds.Add(bed);
+            }
+
+            var nights = new List<DateTime>();
+            if (list.Any())
+            {
+                var startDate = list.First().StartDate;
+                var endDate = list.First().EndDate.AddDays(1);
+                var cursorDate = startDate.Date;
+                while (cursorDate <= endDate)
+                {
+                    nights.Add(cursorDate);
+                    cursorDate = cursorDate.AddDays(1);
+                }
+            }
+            var vm = new AccomodationRoomAvailabilityViewModel()
+            {
+                Id = venueId,
+                Nights = nights,
+                BedAvailability = beds,
+                Beds = Mapper.Map<List<BedViewModel>>(venueInstance.Rooms.SelectMany(r => r.Beds))
+            };
+
             return vm;
         }
         public AccomodationVenueViewModel GetSearchViewModel(VenueAvailabilitySearchResult searchResult)
@@ -320,29 +385,32 @@ namespace CosStay.Site.Controllers
             if (vm.LatLng.HasValue)
                 vm.LatLng = _locationService.Approximate(vm.LatLng);
 
-            var groups = searchResult.Nights.GroupBy(n => n.Bed).Select(g => new { Bed = g.Key, Nights = g.Select(z => z.Night) });
-
-            var bedAvailabilityGroups = new List<Tuple<List<Bed>, List<DateTimeOffset>>>();
-            foreach (var bed in groups)
+            if (searchResult.Nights != null)
             {
-                var existing = bedAvailabilityGroups.FirstOrDefault(g => g.Item2.SequenceEqual(bed.Nights));
-                if (existing == null)
+                var groups = searchResult.Nights.GroupBy(n => n.Bed).Select(g => new { Bed = g.Key, Nights = g.Select(z => z.Night) });
+
+                var bedAvailabilityGroups = new List<Tuple<List<Bed>, List<DateTimeOffset>>>();
+                foreach (var bed in groups)
                 {
-                    existing = new Tuple<List<Bed>, List<DateTimeOffset>>(new List<Bed>(), bed.Nights.OrderBy(n => n).ToList());
-                    bedAvailabilityGroups.Add(existing);
+                    var existing = bedAvailabilityGroups.FirstOrDefault(g => g.Item2.SequenceEqual(bed.Nights));
+                    if (existing == null)
+                    {
+                        existing = new Tuple<List<Bed>, List<DateTimeOffset>>(new List<Bed>(), bed.Nights.OrderBy(n => n).ToList());
+                        bedAvailabilityGroups.Add(existing);
+                    }
+                    existing.Item1.Add(bed.Bed);
                 }
-                existing.Item1.Add(bed.Bed);
-            }
 
-            var bedAvailabilityStrings = new List<string>();
-            foreach (var bedGroups in bedAvailabilityGroups)
-            {
-                bedAvailabilityStrings.Add(string.Format("{0} bed{1} available {2}", 
-                    bedGroups.Item1.Count(), 
-                    bedGroups.Item1.Count() != 1 ? "s" : "", 
-                    string.Join(", ", bedGroups.Item2.Select(n => n.ToString("dddd")))));
+                var bedAvailabilityStrings = new List<string>();
+                foreach (var bedGroups in bedAvailabilityGroups)
+                {
+                    bedAvailabilityStrings.Add(string.Format("{0} bed{1} available {2}",
+                        bedGroups.Item1.Count(),
+                        bedGroups.Item1.Count() != 1 ? "s" : "",
+                        string.Join(", ", bedGroups.Item2.Select(n => n.ToString("dddd")))));
+                }
+                vm.BedAvailability = string.Join(". ", bedAvailabilityStrings);
             }
-            vm.BedAvailability = string.Join(". ", bedAvailabilityStrings);
             return vm;
         }
     }

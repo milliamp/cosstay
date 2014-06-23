@@ -19,5 +19,13 @@ namespace CosStay.Site.Models
         public bool UpdateStart { get; set; }
         public bool UpdateEnd { get; set; }
 
+        public bool ChangesToName { get; set; }
+        public bool ChangesToUrl { get; set; }
+        public bool ChangesToDescription { get; set; }
+        public bool ChangesToCoverImage { get; set; }
+        public bool ChangesToVenue { get; set; }
+        public bool ChangesToStart { get; set; }
+        public bool ChangesToEnd { get; set; }
+
     }
 }

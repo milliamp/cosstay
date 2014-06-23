@@ -1,0 +1,172 @@
+﻿@model CosStay.Site.Areas.Admin.Models.UserAuditViewModel
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <div class="row">
+        <div class="col-lg-7">
+            <h4>User</h4>
+            <hr />
+            <dl class="dl-horizontal">
+                <dt>
+                    @Html.DisplayNameFor(model => model.User.Name)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.User.Name)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.User.JoinDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.User.JoinDate)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.User.LastSeen)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.User.LastSeen)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.User.DetailsUpdatedDate)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.User.DetailsUpdatedDate)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.User.AccessFailedCount)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.User.AccessFailedCount)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.User.Email)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.User.Email)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.User.EmailConfirmed)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.User.EmailConfirmed)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.User.LockoutEnabled)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.User.LockoutEnabled)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.User.LockoutEndDateUtc)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.User.LockoutEndDateUtc)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.User.PasswordHash)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.User.PasswordHash)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.User.PhoneNumber)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.User.PhoneNumber)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.User.PhoneNumberConfirmed)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.User.PhoneNumberConfirmed)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.User.SecurityStamp)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.User.SecurityStamp)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.User.TwoFactorEnabled)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.User.TwoFactorEnabled)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.User.UserName)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.User.UserName)
+                </dd>
+
+                <dt>
+                    @Html.DisplayNameFor(model => model.User.IsDeleted)
+                </dt>
+
+                <dd>
+                    @Html.DisplayFor(model => model.User.IsDeleted)
+                </dd>
+
+            </dl>
+        </div>
+        <div class="col-lg-5">
+            <h4>Audit</h4>
+            <hr />
+            <table class="table audit-table">
+                <tbody>
+                    @{CosStay.Model.Audit lastAudit = null;}
+                    @foreach (var audit in Model.Audits)
+                    {
+                        <tr class="@((lastAudit != null && lastAudit.EventDate == audit.EventDate) ? "same-event": "")">
+                            <td class="audit-date" style="white-space: nowrap;width: 150px">
+                                @audit.EventDate.ToLocalTime().ToString()
+                            </td>
+                            <td class="audit-title" style="white-space:nowrap">
+                                @audit.AuditEvent @audit.ObjectType
+                            </td>
+                            <td class="audit-data" style="white-space:pre">@audit.Data</td>
+                        </tr>
+                        lastAudit = audit;
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.User.Id }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

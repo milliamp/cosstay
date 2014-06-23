@@ -111,17 +111,7 @@ namespace CosStay.Site.Controllers
 
         public string SafeUri(string toSanitise)
         {
-            var safeString = "-_()!";
-            return new string(toSanitise
-                .Replace(" - ", "-")
-                .Replace(" ", "-")
-                .Replace(": ", "-")
-                .Replace(":", "-")
-                .Replace(", ", " ")
-                .Replace("--", "-")
-                .Where(c => Char.IsLetterOrDigit(c) || safeString.Contains(c))
-                .ToArray())
-                .ToLowerInvariant();
+            return UtilityMethods.SafeUri(toSanitise);
         }
 
         public int? FacebookUserId { 

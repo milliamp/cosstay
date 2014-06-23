@@ -32,7 +32,7 @@
         </p>
         <p>
             <i class="glyphicon glyphicon-user"></i>
-            @Model.FriendsAttending
+            @Html.Raw(Model.FriendsAttending)
         </p>
         <p>
             <i class="glyphicon glyphicon-link"></i>
@@ -130,7 +130,7 @@
         </div>
         <script>
             var viewModel = new accomodationVenueSearchViewModel();
-            viewModel.eventId(@Model.EventInstanceId);
+            viewModel.eventId(@Model.Id);
             ko.applyBindings(viewModel);
             var markers = {};
             viewModel.items.subscribe(function(changes) {
@@ -174,9 +174,6 @@
             }, null, "arrayChange");
         </script>
 
-        <p>
-            @Html.ActionLink("Back to List", "Index")
-        </p>
     </div>
     <div class="col-md-5">
 
@@ -187,9 +184,12 @@
     </div>
 
 
-    Last updated @Model.DateUpdated.ToLocalTime()
 </div>
 
+<p>
+    @Html.Toolbar(Model)
+    Last updated @Model.DateUpdated.ToLocalTime()
+</p>
 @section Scripts
 {
     <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
@@ -240,6 +240,10 @@
                 startWithMonth: events[0].startDate
             });
 
+            $('.friends-toggle').popover({
+                html: true,
+                placement: 'bottom'
+            });
         });
     </script>
 }

@@ -139,7 +139,7 @@ namespace CosStay.Site.Controllers
             await SetSharedViewParameters();
             var vm = new EventInstanceViewModel()
             {
-                EventInstanceId = instance.Id,
+                Id = instance.Id,
                 Name = instance.Name,
                 Address = instance.Venue != null ? instance.Venue.Address : "",
                 DateUpdated = instance.DateUpdated,
@@ -173,11 +173,19 @@ namespace CosStay.Site.Controllers
                 return "";
             }
             if (count == 1)
-                return friends[0].name;
+                return FacebookUserHtmlString(friends[0]);
             if (count == 2)
-                return friends[0].name + " and " + friends[1].name;
-            return friends[0].name + ", " + friends[1].name + " and " + count + " other friends";
+                return FacebookUserHtmlString(friends[0]) + " and " + FacebookUserHtmlString(friends[1]);
+            //<button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="bottom" title="Tooltip on bottom">Tooltip on bottom</button>
+            var remainingFriends = "";
+            for (var i = 2; i < count; i++)
+                remainingFriends += HttpUtility.HtmlAttributeEncode(FacebookUserHtmlString(friends[i]) + "<br>");
+            return FacebookUserHtmlString(friends[0]) + ", " + FacebookUserHtmlString(friends[1]) + " and <a href=\"#\" class=\"friends-toggle\" data-content=\"" + remainingFriends + "\">" + UtilityMethods.Pluralize(count - 2, "other friend") + "</a>";
+        }
 
+        protected string FacebookUserHtmlString(dynamic friend)
+        {
+            return string.Format("<a href=\"{1}\">{0}</a>", friend.name, friend.url);
         }
 
         [Authorize(Roles = "Admin")]
@@ -244,7 +252,7 @@ namespace CosStay.Site.Controllers
                 StartDate = instance.StartDate,
                 VenueLatLng = instance.Venue != null ? instance.Venue.LatLng : null,
                 VenueName = instance.Venue != null ? instance.Venue.Name : null,
-                EventInstanceId = instance.Id
+                Id = instance.Id
             };
             return View(vm);
 
@@ -300,7 +308,7 @@ namespace CosStay.Site.Controllers
                 LastUpdated_Database = instance.DateUpdated,
                 Event_Database = new EventInstanceViewModel()
                 {
-                    EventInstanceId = instance.Id,
+                    Id = instance.Id,
                     Name = instance.Name,
                     Address = instance.Venue != null ? instance.Venue.Address : "",
                     DateUpdated = instance.DateUpdated,
@@ -351,17 +359,35 @@ namespace CosStay.Site.Controllers
                         var fbvenue = await _venueService.GetOrCreateMatchingVenueAsync(venue);
                         if (fbvenue == null)
                             fbvenue = venue;
-                        
+
                         fbVm.Address = fbvenue.Address;
                         if (fbvenue.Location != null)
                             fbVm.Location = instance.Venue.Location.Name;
                         fbVm.VenueName = fbvenue.Name;
                         fbVm.VenueLatLng = fbvenue.LatLng;
-                        
+
                     }
                     vm.Event_Facebook = fbVm;
                 }
             }
+
+            vm.ChangesToCoverImage = vm.Event_Database.MainImageUrl != vm.Event_Facebook.MainImageUrl;
+            vm.ChangesToDescription = vm.Event_Database.Description != vm.Event_Facebook.Description;
+            vm.ChangesToEnd = vm.Event_Database.EndDate != vm.Event_Facebook.EndDate;
+            vm.ChangesToName = vm.Event_Database.Name != vm.Event_Facebook.Name;
+            vm.ChangesToStart = vm.Event_Database.StartDate != vm.Event_Facebook.StartDate;
+            vm.ChangesToUrl = vm.Event_Database.Url != vm.Event_Facebook.Url;
+            vm.ChangesToVenue = vm.Event_Database.VenueName != vm.Event_Facebook.VenueName
+                || vm.Event_Database.VenueLatLng != vm.Event_Facebook.VenueLatLng;
+
+
+            vm.UpdateCoverImage = vm.ChangesToCoverImage;
+            vm.UpdateDescription = vm.ChangesToDescription;
+            vm.UpdateEnd = vm.ChangesToEnd;
+            vm.UpdateName = vm.ChangesToName;
+            vm.UpdateStart = vm.ChangesToStart;
+            vm.UpdateUrl = vm.ChangesToUrl;
+            vm.UpdateVenue = vm.ChangesToVenue;
 
             return View(vm);
         }
@@ -442,7 +468,7 @@ namespace CosStay.Site.Controllers
                     await _es.SaveAsync();
                 }
             }
-            return RedirectToAction("Edit", new { id = id });
+            return RedirectToAction("UpdateFromFacebook", new { id = id });
         }
 
     }

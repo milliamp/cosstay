@@ -19,6 +19,8 @@ namespace CosStay.Site.Models
         public int Id { get; set; }
         public int BedSizeId { get; set; }
         public int BedTypeId { get; set; }
+        public string RoomName { get; set; }
+        public string Description { get; set; }
         public DateTimeOffset DateAdded { get; set; }
         public List<Photo> Photos { get; set; }
     }

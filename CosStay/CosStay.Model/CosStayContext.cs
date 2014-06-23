@@ -162,8 +162,13 @@ namespace CosStay.Model
                 {
                     var propertyList = entry.Entity.GetType().GetProperties();
                     // Random Guess based on type
-                    var namedProperty = propertyList.FirstOrDefault(pi => pi.PropertyType == relatedEntity.Entity.GetType() || pi.PropertyType.GenericTypeArguments.Any(gta => gta == relatedEntity.Entity.GetType()));
-                    properties.Add(namedProperty.Name, relatedEntity.EntityKey.EntityKeyValues != null ? relatedEntity.EntityKey.EntityKeyValues[0].Value.ToString() : "New Entry");
+                    var namedProperty = propertyList
+                        .Where(pi => pi.PropertyType == relatedEntity.Entity.GetType() || pi.PropertyType.GenericTypeArguments.Any(gta => gta == relatedEntity.Entity.GetType()))
+                        .Select(pi => pi.Name)
+                        .FirstOrDefault();
+                    if (namedProperty == null)
+                        namedProperty = "<Unknown>";
+                    properties.Add(namedProperty, relatedEntity.EntityKey.EntityKeyValues != null ? relatedEntity.EntityKey.EntityKeyValues[0].Value.ToString() : "New Entry");
                 }
 
                 var objectType = entry.Entity.GetType();
@@ -263,6 +268,10 @@ namespace CosStay.Model
 
         public DbSet<Interest> Interests { get; set; }
         public DbSet<InterestCategory> InterestCategories { get; set; }
+        public DbSet<UserInterest> UserInterests { get; set; }
+        
+        public DbSet<ResidentInterest> ResidentInterests { get; set; }
+        public DbSet<Resident> Residents { get; set; }
 
         public virtual IDbSet<User> Users
         {

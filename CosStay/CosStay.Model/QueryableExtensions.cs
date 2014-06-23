@@ -15,7 +15,7 @@ namespace CosStay.Model
             return await queryable.ToListAsync();
         }
 
-        public static IQueryable<T> IncludePaths<T, TProperty>(this IQueryable<T> queryable, params Expression<Func<T, TProperty>>[] paths)
+        public static IQueryable<T> IncludePaths<T>(this IQueryable<T> queryable, params Expression<Func<T, object>>[] paths)
         {
             foreach (var path in paths)
                 queryable = queryable.Include(path);

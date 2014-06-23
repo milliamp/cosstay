@@ -25,15 +25,6 @@
         </div>
 
         <div class="form-group">
-            @Html.LabelFor(model => model.Address, new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Address, new { htmlAttributes = new { data_bind = "value: Address" } })
-                @Html.ValidationMessageFor(model => model.Address)
-            </div>
-        </div>
-
-
-        <div class="form-group">
             @Html.LabelFor(model => model.PublicAddress, new { @class = "control-label col-md-2" })
             <div class="col-md-10">
                 @Html.EditorFor(model => model.PublicAddress, new { htmlAttributes = new { data_bind = "value: PublicAddress" } })
@@ -41,76 +32,8 @@
             </div>
         </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.AllowsBedSharing, new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.AllowsBedSharing, new { htmlAttributes = new { data_bind = "checked: AllowsBedSharing" } })
-                @Html.ValidationMessageFor(model => model.AllowsBedSharing)
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.AllowsMixedRooms, new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.AllowsMixedRooms, new { htmlAttributes = new { data_bind = "checked: AllowsMixedRooms" } })
-                @Html.ValidationMessageFor(model => model.AllowsMixedRooms)
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="control-label  col-md-2">Total Beds</label>
-            <div class="col-md-10">
-                <span data-bind="text: BedCount" />
-            </div>
-        </div>
 
     </div>
-
-<div class="form-horizontal">
-    <h4>Rooms</h4>
-    <hr />
-    <ul class="rooms">
-        <!-- ko foreach: Rooms -->
-        <li class="room" data-bind="css: { deleted: IsDeleted() }">
-            <span class="id" data-bind="text: Id"></span>
-            <h5><input type="text" data-bind="value: Name" /></h5>
-            <ul class="beds">
-                <!-- ko foreach: Beds -->
-                <li class="bed">
-                    <div class="display-bed" data-bind="click: function () { $($element.parentNode).toggleClass('edit-bed')}">
-                        <span data-bind="text: BedSize"></span>
-                        <span data-bind="text: BedType"></span>
-                    </div>
-                    <div class="edit-bed">
-                        <select data-bind="options: $root.AvailableBedSizes,
-                           optionsText: 'Name',
-                           optionsValue: 'Id',
-                           value: BedSizeId,
-                           optionsCaption: 'Choose...'"></select> <select data-bind="options: $root.AvailableBedTypes,
-                           optionsText: 'Name',
-                           optionsValue: 'Id',
-                           value: BedTypeId,
-                           optionsCaption: 'Choose...'"></select>
-                    </div>
-                </li>
-                <!-- /ko -->
-            </ul>
-            <div class="form-group">
-                <input type="button" value="Add Bed" class="btn btn-default" data-bind="click: addBed" />
-            </div>
-            <button class="remove-room" data-bind="click: removeRoom">x</button>
-        </li>
-        <!-- /ko -->
-    </ul>
-    <hr style="clear:both"/>
-    <div class="form-group clearfix">
-        <div class="col-md-10">
-
-            <input type="button" value="Add Room" class="btn btn-default" data-bind="click: addRoom" />
-            <input type="submit" value="Save" class="btn btn-primary" />
-        </div>
-    </div>
-</div>
     
 }
 <div>

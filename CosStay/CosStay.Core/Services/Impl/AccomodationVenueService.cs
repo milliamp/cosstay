@@ -44,6 +44,33 @@ namespace CosStay.Core.Services.Impl
             return query;
         }
 
+        public async Task<IQueryable<BedAvailabilitySearchResult>> AvailableBedsQueryAsync(int venueId, int eventInstanceId)
+        {
+            var days = new List<DateTimeOffset>();
+            var eventInstance = await _es.GetAsync<EventInstance>(eventInstanceId, ev => ev.Venue.Location);
+            if (eventInstance == null)
+                return null;
+
+            var eventStartDate = eventInstance.StartDate.Date;
+            var eventEndDate = eventInstance.EndDate.Date;
+            var startDate = eventStartDate.AddDays(-DAYS_BEFORE_EVENT_AVAILABILITY_CHECK);
+            var endDate = eventEndDate.AddDays(DAYS_AFTER_EVENT_AVAILABILITY_CHECK);
+
+            var query = _es.GetAll<AccomodationBedAvailabilityNight>()
+                .Where(an => an.Night >= startDate && an.Night <= endDate && (an.BedStatus == BedStatus.Available || an.BedStatus == BedStatus.Tentative))
+                .Where(an => an.Bed.Room.Venue.Id == venueId)
+                .GroupBy(an => an.Bed)
+                .Select(g => new BedAvailabilitySearchResult
+                {
+                    Bed = g.Key,
+                    Nights = g.Select(z => z),
+                    StartDate = startDate,
+                    EndDate = endDate
+                });
+
+            return query;
+        }
+
         public async Task<Model.AccomodationVenue> UpdateVenueAsync(Model.AccomodationVenue dtoInstance)
         {
             AccomodationVenue instance = await _es.GetAsync<AccomodationVenue>(dtoInstance.Id);
@@ -72,6 +99,7 @@ namespace CosStay.Core.Services.Impl
 
             // TODO: Do we really have to this whole pile of crap manually!?!?!
             // we have automapper right!?
+            instance.Name = dtoInstance.Name;
             instance.Address = dtoInstance.Address;
             instance.PublicAddress = dtoInstance.PublicAddress;
             instance.AllowsBedSharing = dtoInstance.AllowsBedSharing;
@@ -114,21 +142,22 @@ namespace CosStay.Core.Services.Impl
                 }
             }
 
-            /*foreach (var thisRoom in dtoInstance.Rooms)
+            foreach (var resident in dtoInstance.Residents)
             {
-                foreach (var bed in thisRoom.Beds)
+                var residentInstance = resident;
+                if (residentInstance.Id != 0)
                 {
-                    //TODO: Can we use Stub Entities here?
-                    if (bed.BedSize != null)
-                        bed.BedSize = _es.Get<BedSize>(bed.BedSize.Id);
-                    if (bed.BedType != null)
-                        bed.BedType = _es.Get<BedType>(bed.BedType.Id);
+                    residentInstance = instance.Residents.FirstOrDefault(r => r.Id == resident.Id);
+                    residentInstance.Name = resident.Name;
+                    residentInstance.Order = resident.Order;
+                    residentInstance.ResidentImage = resident.ResidentImage;
                 }
-            }*/
+                else
+                {
+                    instance.Residents.Add(resident);
+                }
+            }
 
-            /*foreach (var room in dtoInstance.Rooms)
-                _es.Update(room, v => v.Beds);
-            _es.Update(dtoInstance, v => v.Rooms);*/
             await _es.SaveAsync();
             return dtoInstance;
         }

@@ -96,15 +96,41 @@ namespace CosStay.Model
         public string ShortName { get; set; }
     }
 
+    public class UserInterest: IAddable, IDestoyable, IAuditable, IEntity
+    {
+        public int Id { get; set; }
+        public virtual Interest Interest { get; set; }
+        public virtual User User { get; set; }
+        public string Description { get; set; }
+    }
+
+    public class ResidentInterest : IAddable, IDestoyable, IAuditable, IEntity
+    {
+        public int Id { get; set; }
+        public virtual Interest Interest { get; set; }
+        public virtual Resident Resident { get; set; }
+        public string Description { get; set; }
+    }
+
+    public enum ImageProviderService
+    {
+        None = 0
+    }
+
     public class Interest : NamedEntity, IAddable, IAuditable
     {
         public virtual InterestCategory Category { get; set; }
-        public virtual List<User> Users { get; set; }
+        public virtual List<UserInterest> UserInterests { get; set; }
+        public virtual List<ResidentInterest> ResidentInterests { get; set; }
+        public bool AllowDescription { get; set; }
+        public bool RequireDescription { get; set; }
+        public bool Approved { get; set; }
     }
     public class InterestCategory : NamedEntity
     {
         public string Icon { get; set; }
         public virtual List<Interest> Interests { get; set; }
+        public ImageProviderService ImageProviderService { get; set; }
     }
 
     public class User : IUser<string>, IAddable, IDeletable, IAuditable
@@ -120,10 +146,12 @@ namespace CosStay.Model
         [Display(Name = "Last Updated", ShortName = "Updated")]
         public DateTimeOffset DetailsUpdatedDate { get; set; }
 
+        public virtual Resident Resident { get; set; }
+
         //public virtual List<Role> Roles { get; set; }
         public virtual List<ContactMethod> ContactMethods { get; set; }
 
-        public virtual List<Interest> Interests { get; set; }
+        public virtual List<UserInterest> Interests { get; set; }
 
         // From AspNet.Identity.EntityFramework
         // Summary:
@@ -350,12 +378,27 @@ namespace CosStay.Model
         public bool AllowsBedSharing { get; set; }
         [Display(Name = "Allows Mixed Rooms", ShortName = "Mixed Rooms")]
         public bool AllowsMixedRooms { get; set; }
-
+        
+        [InverseProperty("AccomodationVenue")] 
         public virtual List<Photo> Photos { get; set; }
+        public virtual Photo CoverImage { get; set; }
         public virtual List<AccomodationRoom> Rooms { get; set; }
         public bool IsDeleted { get; set; }
 
         public string OwnerId { get { return Owner != null ? Owner.Id : null; } }
+
+        public virtual List<Resident> Residents { get; set; }
+        
+        public bool AddressVerified { get; set; }
+
+    }
+
+    public class Resident : NamedEntity, IAddable, IDestoyable, IAuditable
+    {
+        public int ResidentImage { get; set; }
+        public int Order { get; set; }
+
+        public virtual List<ResidentInterest> Interests { get; set; }
     }
 
 
@@ -428,7 +471,7 @@ namespace CosStay.Model
         public bool IsDeleted { get; set; }
     }
 
-    public class Photo : IDeletable, IOwnable, IAuditable
+    public class Photo : IAddable, IDeletable, IOwnable, IAuditable
     {
         public Guid PhotoId { get; set; }
         public string Caption { get; set; }
@@ -438,6 +481,23 @@ namespace CosStay.Model
         public DateTimeOffset DateAdded { get; set; }
         public bool IsDeleted { get; set; }
         public string OwnerId { get { return Owner != null ? Owner.Id : null; } }
+
+        public virtual int? BedId { get; set; }
+        public virtual int? LocationId { get; set; }
+        public virtual int? EventId { get; set; }
+        public virtual int? EventInstanceId { get; set; }
+        public virtual int? AccomodationRoomId { get; set; }
+        public virtual int? AccomodationVenueId { get; set; }
+        public virtual int? VenueId { get; set; }
+
+        public virtual Bed Bed { get; set; }
+        public virtual Location Location { get; set; }
+        public virtual Event Event { get; set; }
+        public virtual EventInstance EventInstance { get; set; }
+        public virtual AccomodationRoom AccomodationRoom { get; set; }
+        public virtual AccomodationVenue AccomodationVenue { get; set; }
+        public virtual Venue Venue { get; set; }
+
     }
 
     public class Bed : IEntity, IAddable, IDeletable, IAuditable

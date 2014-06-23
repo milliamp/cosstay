@@ -13,6 +13,8 @@ using CosStay.Model;
 using CosStay.Site.Models;
 using CosStay.Site.Controllers;
 using CosStay.Core.Services;
+using AutoMapper;
+using System.Globalization;
 
 namespace CosPlay.Site.Controllers
 {
@@ -389,6 +391,107 @@ namespace CosPlay.Site.Controllers
                 if (emailClaim != null)
                     user.Email = emailClaim.ClaimValue;
             }
+        }
+
+        [Route("account/profile/edit")]
+        [Authorize]
+        public ActionResult EditProfile()
+        {
+            var currentUser = _userService.CurrentUser;
+
+            var userInterests = _es.GetAll<UserInterest>()
+                .Where(ui => ui.User.Id == currentUser.Id)
+                .Select(ui => ui.Interest.Name);
+
+            var vm = new UserProfileViewModel()
+            {
+                User = Mapper.Map<UserViewModel>(_userService.CurrentUser),
+                UserInterests = string.Join(",", userInterests)
+            };
+
+            return View(vm);
+        }
+
+        [Route("account/profile/edit")]
+        [Authorize]
+        [HttpPost]
+        public async Task<ActionResult> EditProfile(UserProfileViewModel vm)
+        {
+
+            var currentUser = _userService.CurrentUser;
+
+            var postedStrings = vm.UserInterests.Split(',');
+            var postedInterests = await _es.GetAll<Interest>()
+                .Where(i => postedStrings.Contains(i.Name)).ToAsyncList();
+
+            var unresolvedStrings = postedStrings.Except(postedInterests.Select(i => i.Name), StringComparer.InvariantCultureIgnoreCase);
+            var newInterests = new List<Interest>();
+            foreach (var newString in unresolvedStrings)
+            {
+                var name = newString;
+                if (name == name.ToLowerInvariant())
+                {
+                    name = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(newString);
+                }
+
+                var newInterest = new Interest()
+                {
+                    Name =  name,
+                    Category = _es.GetAll<InterestCategory>().First(c => c.Name == "Other interests"),
+                    Approved = false
+                };
+
+                newInterests.Add(newInterest);
+            }
+
+            var interestsToRemove = currentUser.Interests.Where(i => !postedInterests.Contains(i.Interest)).ToList();
+            var interestsToAdd = postedInterests.Where(p => !currentUser.Interests.Any(i => i.Interest.Id == p.Id)).Concat(newInterests);
+
+            foreach (var toRemove in interestsToRemove)
+            {
+                currentUser.Interests.Remove(toRemove);
+            }
+            foreach (var toAdd in interestsToAdd)
+            {
+                currentUser.Interests.Add(new UserInterest()
+                {
+                    Interest = toAdd,
+                    User = currentUser
+                });
+            }
+
+            await _es.SaveAsync();
+            return RedirectToAction("EditProfile");
+
+            //return View(vm);
+        }
+
+        [Route("account/profile/interests")]
+        [Authorize]
+        public async Task<JsonResult> InterestList(string search)
+        {
+            var interests = await _es.GetAll<Interest>()
+                .IncludePaths(i => i.Category)
+                .Where(i => i.Name.Contains(search) || i.Category.Name.Contains(search))
+                /*.Select(i => new GroupedSelectListItem {
+                    Text = i.Name,
+                    GroupName = i.Category.Name,
+                    GroupKey = i.Category.Id.ToString(),
+                    Value = i.Id.ToString(),
+                    Selected = i.Users.Any(u => u.Id == currentUser.Id)
+                })*/
+                .OrderBy(g => g.Name)
+                .Select(i => new
+                {
+                    id = i.Id,
+                    label = i.Name,
+                    value = i.Name,
+                    Category = i.Category.Name,
+                    Icon = i.Category.Icon
+                })
+                    .ToAsyncList();
+
+            return Json(interests);
         }
 
         protected override void Dispose(bool disposing)

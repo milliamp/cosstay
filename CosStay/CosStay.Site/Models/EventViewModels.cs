@@ -9,7 +9,7 @@ namespace CosStay.Site.Models
 {
     public class EventInstanceViewModel
     {
-        public int EventInstanceId { get; set; }
+        public int Id { get; set; }
         public int ParentEventId { get; set; }
         public string Name { get; set; }
         [Display(Name = "Website")]

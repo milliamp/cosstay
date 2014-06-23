@@ -55,23 +55,16 @@
                     <th>
                         @Html.DisplayColumnNameFor(new CosStay.Site.Models.AccomodationVenueViewModel(), model => model.TotalBeds)
                     </th>
-                    <th>
-                        @Html.DisplayColumnNameFor(new CosStay.Site.Models.AccomodationVenueViewModel(), model => model.AllowsBedSharing)
-                    </th>
-                    <th>
-                        @Html.DisplayColumnNameFor(new CosStay.Site.Models.AccomodationVenueViewModel(), model => model.AllowsMixedRooms)
-                    </th>
                     <th></th>
                 </tr>
             </thead>
-            <tbody data-bind="foreach: items">
+            <tbody data-bind="foreach: itemSource">
                 <tr>
                     <td><a href="" data-bind="text:Name, attr: { href: '/accomodation/' + Id }"></a></td>
                     <td data-bind="text:Address"></td>
                     <td data-bind="text:TotalBeds"></td>
-                    <td data-bind="text:AllowsBedSharing"></td>
-                    <td data-bind="text:AllowsMixedRooms"></td>
                     <td>
+                        
                         @*@Html.TrimmedActionLink("Edit", "Edit", item, new { id = item.Id }, true) |
                             @Html.TrimmedActionLink("Details", "Details", item, new { id = item.Id, name = item.Name }, true) |
                             @Html.TrimmedActionLink("Delete", "Delete", item, new { id = item.Id }, true)*@

@@ -42,7 +42,8 @@ namespace CosStay.Site.Models
         [Display(Name = "Allows Mixed Rooms")]
         public bool AllowsMixedRooms { get; set; }
 
-        public List<Photo> Photos { get; set; }
+        public Photo CoverImage { get; set; }
+        public List<PhotoViewModel> Photos { get; set; }
         public List<AccomodationRoomViewModel> Rooms { get; set; }
         
         [Display(Name = "Number of Beds")]
@@ -52,8 +53,11 @@ namespace CosStay.Site.Models
         public string BedAvailability { get; set; }
 
         public Dictionary<EventInstance, TravelInfo> TravelInfo { get; set; }
+        public Dictionary<EventInstance, AccomodationRoomAvailabilityViewModel> AvailabilityViewModel { get; set; }
 
         public List<BedSize> AvailableBedSizes { get; set; }
         public List<BedType> AvailableBedTypes { get; set; }
+
+        public List<Resident> Residents { get; set; }
     }
 }

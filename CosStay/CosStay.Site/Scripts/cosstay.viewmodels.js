@@ -54,6 +54,7 @@ var accomodationVenueViewModel = function (data) {
     this.AllowsMixedRooms = ko.observable();
     this.Photos = ko.observableArray();
     this.Rooms = ko.observableArray();
+    this.Residents = ko.observableArray();
     this.BedCount = ko.computed(function () {
         var sum = 0;
         var b = ko.utils.arrayForEach(self.Rooms(), function (i) {
@@ -73,6 +74,13 @@ var accomodationVenueViewModel = function (data) {
         this.Rooms.push(n);
         return n;
     };
+
+    this.addResident = function () {
+        var n = new residentViewModel();
+        n.ResidentImage(Math.floor(Math.random() * 3 ) + 1);
+        this.Residents.push(n);
+        return n;
+    }
 };
 var accomodationRoomViewModel = function (data) {
     this.$type = 'accomodationRoomViewModel';
@@ -141,6 +149,55 @@ var bedSizeModel = function (id, name) {
     this.Id = id;
     this.Name = name;
 };
+var interestModel = function (id, name) {
+    this.$type = 'interestModel';
+    this.Id = id;
+    this.Name = name;
+}
+
+var userProfileViewModel = function (data) {
+    var self = this;
+    this.$type = 'userProfileViewModel';
+    this.AvailableInterests = ko.observableArray();
+    this.UserInterests = ko.observableArray();
+
+    if (data) {
+        ko.mapping.fromJS(data, mapping, this);
+    }
+}
+
+var residentViewModel = function (data) {
+    var self = this;
+    this.$type = 'residentViewModel';
+    this.Name = ko.observable();
+    this.Order = ko.observable();
+    this.ResidentImage = ko.observable();
+    this.ResidentCssClass = ko.computed(function () {
+        return "resident-" + self.ResidentImage();
+    })
+
+    if (data) {
+        ko.mapping.fromJS(data, mapping, this);
+    }
+
+    this.nextImage = function () {
+        this.ResidentImage(((this.ResidentImage() + 1) % 3) + 1);
+    }
+}
+
+var photoViewModel = function (data) {
+    var self = this;
+    this.$type = 'photoViewModel';
+    this.Id = ko.observable();
+    this.Caption = ko.observable();
+    this.Url = ko.observable();
+
+    if (data) {
+        ko.mapping.fromJS(data, mapping, this);
+    }
+}
+
+
 var mapping = {
     'Beds': {
         create: function (options) {
@@ -160,6 +217,22 @@ var mapping = {
     'AvailableBedSizes': {
         create: function (options) {
             return new bedSizeModel(options.data.Id, options.data.Name);
+        }
+    },
+    'Interests': {
+        create: function (options)
+        {
+            return new interestModel(options.data.Id, options.data.Name);
+        }
+    },
+    'Residents': {
+        create: function (options) {
+            return new residentViewModel(options.data);
+        }
+    },
+    'Photos': {
+        create: function (options) {
+            return new photoViewModel(options.data);
         }
     }
 };

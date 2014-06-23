@@ -28,7 +28,7 @@
     </dl>
     @using (Html.BeginForm())
     {
-    <table>
+    <table class="change-table">
         <thead>
             <tr>
                 <th></th>
@@ -37,58 +37,58 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
+            <tr class="@(Model.ChangesToName?"changed":"")">
                 <th>Name</th>
                 <td>@Html.DisplayFor(model => model.Event_Database.Name)</td>
                 <td>@Html.DisplayFor(model => model.Event_Facebook.Name)</td>
                 <td>@Html.EditorFor(model => model.UpdateName)</td>
             </tr>
-            <tr>
+            <tr class="@(Model.ChangesToUrl?"changed":"")">
                 <th>URL</th>
                 <td>@Html.DisplayFor(model => model.Event_Database.Url)</td>
                 <td>@Html.DisplayFor(model => model.Event_Facebook.Url)</td>
                 <td>@Html.EditorFor(model => model.UpdateUrl)</td>
             </tr>
-            <tr>
+            <tr class="@(Model.ChangesToDescription?"changed":"")">
                 <th>Description</th>
                 <td>@Html.DisplayFor(model => model.Event_Database.Description)</td>
                 <td>@Html.DisplayFor(model => model.Event_Facebook.Description)</td>
                 <td>@Html.EditorFor(model => model.UpdateDescription)</td>
             </tr>
-            <tr>
+            <tr class="@(Model.ChangesToCoverImage?"changed":"")">
                 <th>Cover Image</th>
                 <td><img src="@Model.Event_Database.MainImageUrl" /></td>
                 <td><img src="@Model.Event_Facebook.MainImageUrl" /></td>
                 <td>@Html.EditorFor(model => model.UpdateCoverImage)</td>
             </tr>
-            <tr>
+            <tr class="@(Model.ChangesToVenue?"changed":"")">
                 <th>Venue Name</th>
                 <td>@Html.DisplayFor(model => model.Event_Database.VenueName)</td>
                 <td>@Html.DisplayFor(model => model.Event_Facebook.VenueName)</td>
-                <td>@Html.EditorFor(model => model.UpdateVenue)</td>
+                <td rowspan="4">@Html.EditorFor(model => model.UpdateVenue)</td>
             </tr>
-            <tr>
+            <tr class="@(Model.ChangesToVenue?"changed":"")">
                 <th>Venue Location</th>
                 <td>@Html.DisplayFor(model => model.Event_Database.VenueLatLng)</td>
                 <td>@Html.DisplayFor(model => model.Event_Facebook.VenueLatLng)</td>
             </tr>
-            <tr>
+            <tr class="@(Model.ChangesToVenue?"changed":"")">
                 <th>Address</th>
                 <td>@Html.DisplayFor(model => model.Event_Database.Address)</td>
                 <td>@Html.DisplayFor(model => model.Event_Facebook.Address)</td>
             </tr>
-            <tr>
+            <tr class="@(Model.ChangesToVenue?"changed":"")">
                 <th>Location</th>
                 <td>@Html.DisplayFor(model => model.Event_Database.Location)</td>
                 <td>@Html.DisplayFor(model => model.Event_Facebook.Location)</td>
             </tr>
-            <tr>
+            <tr class="@(Model.ChangesToStart?"changed":"")">
                 <th>Start</th>
                 <td>@Html.DisplayFor(model => model.Event_Database.StartDate)</td>
                 <td>@Html.DisplayFor(model => model.Event_Facebook.StartDate)</td>
                 <td>@Html.EditorFor(model => model.UpdateStart)</td>
             </tr>
-            <tr>
+            <tr class="@(Model.ChangesToEnd?"changed":"")">
                 <th>End</th>
                 <td>@Html.DisplayFor(model => model.Event_Database.EndDate)</td>
                 <td>@Html.DisplayFor(model => model.Event_Facebook.EndDate)</td>

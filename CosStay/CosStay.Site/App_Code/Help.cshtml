@@ -1,0 +1,8 @@
+﻿@helper Pluralize(int count, string noun, string pluralVersion = null)
+{
+    @count @(" ") @(count != 1 ? (pluralVersion != null ? pluralVersion : noun + "s") : noun)
+}
+@helper GoogleLatLng(CosStay.Model.LatLng latlng)
+{<text>
+new google.maps.LatLng(@latlng.Lat , @latlng.Lng)
+</text>}

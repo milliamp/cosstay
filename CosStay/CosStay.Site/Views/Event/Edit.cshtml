@@ -17,6 +17,14 @@
         @Html.ValidationSummary(true)
 
         <div class="form-group">
+            @Html.LabelFor(model => model.FacebookEventId, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.FacebookEventId)
+                @Html.ValidationMessageFor(model => model.FacebookEventId)
+            </div>
+        </div>
+
+        <div class="form-group">
             @Html.LabelFor(model => model.Name, new { @class = "control-label col-md-2" })
             <div class="col-md-10">
                 @Html.EditorFor(model => model.Name)
@@ -44,17 +52,6 @@
                 @Html.ValidationMessageFor(model => model.ParentEventId)
             </div>
         </div>
-
-
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.FacebookEventId, new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.FacebookEventId)
-                @Html.ValidationMessageFor(model => model.FacebookEventId)
-            </div>
-        </div>
-
 
         <div class="form-group">
             @Html.LabelFor(model => model.VenueName, new { @class = "control-label col-md-2" })

@@ -4,31 +4,31 @@
     ViewBag.Title = "Details";
 }
 
-    @section scripts
+@section scripts
     {
-        @if (Model.LatLng.HasValue)
-        {
+    @if (Model.LatLng.HasValue)
+    {
         <script type="text/javascript"
                 src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB21AFsFMbmFCkYKe7ZrBN46p7Rop-twLY&sensor=false">
         </script>
         <link rel="stylesheet" type="text/css" href="~/Content/map-icons.css" />
         <script src="~/scripts/map-icons.js"></script>
         <script type="text/javascript">
-            function initialize() {
-                    
-                var mapOptions = {
-                    center: new google.maps.LatLng(@Model.LatLng.Lat , @Model.LatLng.Lng),
-                    zoom: 13
-                };
+    function initialize() {
 
-                var map = new google.maps.Map(document.getElementById("map-canvas"),
-                    mapOptions);
+        var mapOptions = {
+            center: @Help.GoogleLatLng(Model.LatLng),
+            zoom: 13
+        };
 
-                var accomodationMarker = new Marker({
-                    map: map,
-                    zIndex: 9,
-                    title: '@Model.Name',
-                    position:  new google.maps.LatLng(@Model.LatLng.Lat , @Model.LatLng.Lng),
+        var map = new google.maps.Map(document.getElementById("map-canvas"),
+            mapOptions);
+
+        var accomodationMarker = new Marker({
+            map: map,
+            zIndex: 9,
+            title: '@Model.Name',
+                    position: @Help.GoogleLatLng(Model.LatLng),
                     icon: {
                         path: MAP_PIN,
                         fillColor: '#2fa4e7',
@@ -39,105 +39,150 @@
                     },
                     label: '<i class="glyphicon glyphicon-home"></i>'
                 });
-                
+
                 @if (Model.TravelInfo != null)
                 {
                 foreach (var eventVenue in Model.TravelInfo.Where(v => v.Key.Venue != null && v.Key.Venue.LatLng.HasValue).Select(kv => kv.Key))
                 {<text>
-                new Marker({
-                    map: map,
-                    zIndex: 9,
-                    title: '@eventVenue.Name @@ @eventVenue.Venue.Name',
-                    position:  new google.maps.LatLng(@eventVenue.Venue.LatLng.Lat , @eventVenue.Venue.LatLng.Lng),
-                    icon: {
-                        path: MAP_PIN,
-                        fillColor: '#2fa4e7',
-                        fillOpacity: 1,
-                        strokeColor: '#ffffff',
-                        strokeWeight: 1,
-                        scale: 1/4
-                    },
-                    label: '<i class="glyphicon glyphicon-star"></i>'
-                });
-                </text>}
+        new Marker({
+            map: map,
+            zIndex: 9,
+            title: '@eventVenue.Name @@ @eventVenue.Venue.Name',
+            position:  @Help.GoogleLatLng(eventVenue.Venue.LatLng),
+            icon: {
+                path: MAP_PIN,
+                fillColor: '#2fa4e7',
+                fillOpacity: 1,
+                strokeColor: '#ffffff',
+                strokeWeight: 1,
+                scale: 1/4
+            },
+            label: '<i class="glyphicon glyphicon-star"></i>'
+        });
+        </text>}
                 }
-            
-            }
-            google.maps.event.addDomListener(window, 'load', initialize);
+
+    }
+    google.maps.event.addDomListener(window, 'load', initialize);
         </script>
     }
-    
+
 }
-
-<h2>@Html.DisplayFor(model => model.Name)</h2>
-
-<address>@Html.DisplayFor(model => model.PublicAddress)</address>
-@if (Model.Owner != null)
-{
-    <div class="owner panel panel-primary">
-        <div class="panel-heading">
-            Owner
-        </div>
-        <div class="panel-body">
-            <div style="float:left;">@Html.Gravatar(Model.Owner.Email, 80)</div>
-            <div>
-                @Model.Owner.Name <br />
-            </div>
-        </div>
-    </div>
-}
-
-<hr />
 <div class="row">
-
-    <div class="col-lg-6 col-md-8">
-        <dl class="dl-horizontal">
-            <dt>
-                @Html.DisplayNameFor(model => model.DateAdded)
-            </dt>
-
-            <dd>
-                @Html.DisplayFor(model => model.DateAdded)
-            </dd>
-
-            <dt>
-                @Html.DisplayNameFor(model => model.AllowsBedSharing)
-            </dt>
-
-            <dd>
-                @Html.DisplayFor(model => model.AllowsBedSharing)
-            </dd>
-
-            <dt>
-                @Html.DisplayNameFor(model => model.AllowsMixedRooms)
-            </dt>
-
-            <dd>
-                @Html.DisplayFor(model => model.AllowsMixedRooms)
-            </dd>
-
-        </dl>
-        @if (Model.TravelInfo != null)
-        {
-            <div class="travel-info">
-                @foreach (var eventTravel in Model.TravelInfo)
+    <header class="accomodation-header" style="background-image: url(https://dl.dropboxusercontent.com/u/297705/house.jpg)">
+        <div class="accomodation-details">
+            <div class="main-details">
+                <h1 title="Added @Model.DateAdded.ToString("dd/mm/yyyy")">@Html.DisplayFor(model => model.Name)</h1>
+                <address><i class="glyphicon glyphicon-map-marker"></i> @Html.DisplayFor(model => model.PublicAddress)</address>
+            </div>
+            <div class="accomodation-who">
+                @foreach (var resident in Model.Residents)
                 {
-                    <p>
-                        To @eventTravel.Key.Name:
-                        <ul>
-                            @foreach (var travelMethod in eventTravel.Value.TravelCosts)
-                            {
-                                <li>@Enum.GetName(typeof(CosStay.Model.TravelMethod), travelMethod.Method): @travelMethod.Distance km</li>
-                            }
-                        </ul>
-                    </p>
+                    <span class="resident resident-@resident.ResidentImage" title="@resident.Name">@resident.Name</span>
                 }
             </div>
+        </div>
+    </header>
+</div>
+<div class="iconbar" role="toolbar">
+    <ul>
+        <li title="No smoking">No smoking</li>
+        <li title="No alcohol">No alcohol</li>
+        @if (Model.AllowsBedSharing)
+        {
+            <li title="@Html.DisplayNameFor(model => model.AllowsBedSharing)">@Html.DisplayNameFor(model => model.AllowsBedSharing)</li>
+        }
+        @if (Model.AllowsMixedRooms)
+        {
+            <li title="@Html.DisplayNameFor(model => model.AllowsMixedRooms)">@Html.DisplayNameFor(model => model.AllowsMixedRooms)</li>
+        }
+    </ul>
+    <ul class="iconbar-right">
+        <li>@Help.Pluralize(Model.TotalBeds, "bed")</li>
+    </ul>
+</div>
+
+<div class="row">
+    <div id="map-canvas" style="height: 400px; display:none" class="col-lg-6 col-md-4"></div>
+    <div class="col-lg-6 col-md-8">
+
+        @foreach (var eventKV in Model.AvailabilityViewModel)
+        {
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3>@Html.ActionLink(eventKV.Key.Name, "Details", "Event", new { id = eventKV.Key.Id }, null)</h3>
+            </div>
+            <div class="panel-body">
+                <table class="bed-availability">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            @foreach (var night in eventKV.Value.Nights)
+                            {
+                                <th>@night.ToString("dd MMM")</th>
+                            }
+                        </tr>
+                    </thead>
+                    @foreach (var room in eventKV.Value.Beds.GroupBy(b => b.RoomName))
+                    {
+                    <thead>
+                        <tr>
+                            <th colspan="@(eventKV.Value.Nights.Count() + 1)">
+                                @room.Key
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var bed in room)
+                        {
+                        <tr>
+                            <th>@bed.Description</th>
+                            @{var bedAvailability = eventKV.Value.BedAvailability.FirstOrDefault(n => n.Id == bed.Id);}
+                            @foreach (var night in eventKV.Value.Nights)
+                            {
+                                var status = bedAvailability != null ? bedAvailability.Nights.FirstOrDefault(n => n.Item1 == night) : null;
+                                <td class="@(status != null ? status.Item2.ToString().ToLower() : "not-available")">
+                                    @(status != null ? status.Item2.ToString() : "")
+                                </td>
+                            }
+                        </tr>
+                        }
+                    </tbody>
+                    }
+                </table>
+
+                @if (Model.TravelInfo != null && Model.TravelInfo.ContainsKey(eventKV.Key))
+                {
+                    <div class="travel-info">
+                        <p>
+                            <ul>
+                                @foreach (var travelMethod in Model.TravelInfo[eventKV.Key].TravelCosts)
+                                {
+                                    <li>@Enum.GetName(typeof(CosStay.Model.TravelMethod), travelMethod.Method): @travelMethod.Distance km</li>
+                                }
+                            </ul>
+                        </p>
+                    </div>
+                }
+            </div>
+        </div>
+        }
+
+            
+    </div>
+    <div class="col-sm-2">
+        @foreach (var photo in Model.Photos)
+        {
+        <a href="#" class="thumbnail">
+            <img src="@Url.Photo(photo.Id, 400)" alt="@photo.Caption" title="@photo.Caption">
+        </a>
+
         }
     </div>
-    <div id="map-canvas" style="height: 400px;" class="col-lg-6 col-md-4"></div>
 </div>
-<p>
-    @Html.TrimmedActionLink("Edit", "Edit", Model, new { id = Model.Id }) |
-    @Html.ActionLink("Back to List", "Index")
-</p>
+<div class="row">
+    <p>
+        <a href="@Url.Action("Index")" class="btn btn-default">Back to List</a>
+        @Html.Toolbar(Model)
+    </p>
+</div>

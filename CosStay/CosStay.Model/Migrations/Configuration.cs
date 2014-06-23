@@ -274,8 +274,41 @@ namespace CosStay.Model.Migrations
                 i => i.Name,
                 new Interest()
                 {
+                    Name = "Anime",
+                    Category = context.InterestCategories.Single(a => a.Name == "Anime")
+                },
+
+                new Interest()
+                {
+                    Name = "Manga",
+                    Category = context.InterestCategories.Single(a => a.Name == "Manga")
+                },
+                new Interest()
+                {
+                    Name = "Comics",
+                    Category = context.InterestCategories.Single(a => a.Name == "Comics")
+                },
+
+                new Interest()
+                {
+                    Name = "Films",
+                    Category = context.InterestCategories.Single(a => a.Name == "Films")
+                },
+                new Interest()
+                {
                     Name = "Cosplay",
                     Category = context.InterestCategories.Single(a => a.Name == "Cosplay")
+                },
+                new Interest()
+                {
+                    Name = "TV Shows",
+                    Category = context.InterestCategories.Single(a => a.Name == "TV Shows")
+                },
+
+                new Interest()
+                {
+                    Name = "Books",
+                    Category = context.InterestCategories.Single(a => a.Name == "Books")
                 },
                 new Interest()
                 {

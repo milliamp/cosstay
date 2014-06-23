@@ -11,5 +11,6 @@ namespace CosStay.Core.Services
     {
         Task<Model.AccomodationVenue> UpdateVenueAsync(AccomodationVenue venue);
         Task<IQueryable<VenueAvailabilitySearchResult>> AvailableVenuesQueryAsync(int eventInstanceId);
+        Task<IQueryable<BedAvailabilitySearchResult>> AvailableBedsQueryAsync(int venueId, int eventInstanceId);
     }
 }
