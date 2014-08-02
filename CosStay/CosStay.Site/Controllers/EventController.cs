@@ -309,7 +309,7 @@ namespace CosStay.Site.Controllers
                 Event_Database = new EventInstanceViewModel()
                 {
                     Id = instance.Id,
-                    Name = instance.Name,
+                    Name = instance.Name, 
                     Address = instance.Venue != null ? instance.Venue.Address : "",
                     DateUpdated = instance.DateUpdated,
                     Description = instance.Description,

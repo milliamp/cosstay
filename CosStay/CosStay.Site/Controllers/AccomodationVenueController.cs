@@ -88,7 +88,7 @@ namespace CosStay.Site.Controllers
         public async Task<ActionResult> Details(int id, string name)
         {
             var instance = await ValidateDetailsAsync<AccomodationVenue>(_es, id, name);
-            await DenyIfNotAuthorizedAsync(ActionType.Read, instance);
+            DenyIfNotAuthorizedAsync(ActionType.Read, instance);
 
             var fullInstance = _es.GetAll<AccomodationVenue>()
                 .IncludePaths(
@@ -139,7 +139,7 @@ namespace CosStay.Site.Controllers
         [ActionType(ActionType.Create)]
         public async Task<ActionResult> Create()
         {
-            await DenyIfNotAuthorizedAsync<AccomodationVenue>(ActionType.Create);
+            DenyIfNotAuthorizedAsync<AccomodationVenue>(ActionType.Create);
             return View();
         }
 
@@ -153,7 +153,7 @@ namespace CosStay.Site.Controllers
         [ActionType(ActionType.Create)]
         public async Task<ActionResult> Create([Bind(Include = "Name,Address,AllowsBedSharing,AllowsMixedRooms")] AccomodationVenue accomodationvenue)
         {
-            await DenyIfNotAuthorizedAsync<AccomodationVenue>(ActionType.Create);
+            DenyIfNotAuthorizedAsync<AccomodationVenue>(ActionType.Create);
             if (ModelState.IsValid)
             {
                 var currentUser = await GetCurrentUserAsync();
@@ -188,7 +188,7 @@ namespace CosStay.Site.Controllers
                 return HttpNotFound();
             }
 
-            await DenyIfNotAuthorizedAsync(ActionType.Update, accomodationvenue);
+            DenyIfNotAuthorizedAsync(ActionType.Update, accomodationvenue);
             var vm = GetExtendedViewModel(accomodationvenue);
 
             return View(vm);
@@ -209,7 +209,7 @@ namespace CosStay.Site.Controllers
                 return HttpNotFound();
             }
 
-            await DenyIfNotAuthorizedAsync(ActionType.Update, accomodationvenue);
+            DenyIfNotAuthorizedAsync(ActionType.Update, accomodationvenue);
             var vm = GetExtendedViewModel(accomodationvenue);
 
             return View(vm);
@@ -229,7 +229,7 @@ namespace CosStay.Site.Controllers
             {
                 AccomodationVenue instance = await _es.GetAsync<AccomodationVenue>(id);
 
-                await DenyIfNotAuthorizedAsync(ActionType.Update, instance);
+                DenyIfNotAuthorizedAsync(ActionType.Update, instance);
 
                 var dtoInstance = Mapper.Map<AccomodationVenueViewModel, AccomodationVenue>(accomodationVenueViewModel);
 
@@ -251,7 +251,7 @@ namespace CosStay.Site.Controllers
             {
                 AccomodationVenue instance = await _es.GetAsync<AccomodationVenue>(id);
 
-                await DenyIfNotAuthorizedAsync(ActionType.Update, instance);
+                DenyIfNotAuthorizedAsync(ActionType.Update, instance);
 
                 var dtoInstance = Mapper.Map<AccomodationVenueViewModel, AccomodationVenue>(accomodationVenueViewModel);
 
@@ -278,7 +278,7 @@ namespace CosStay.Site.Controllers
                 return HttpNotFound();
             }
 
-            await DenyIfNotAuthorizedAsync(ActionType.Delete, accomodationvenue);
+            DenyIfNotAuthorizedAsync(ActionType.Delete, accomodationvenue);
             return View(accomodationvenue);
         }
 
@@ -297,7 +297,7 @@ namespace CosStay.Site.Controllers
                 return HttpNotFound();
             }
 
-            await DenyIfNotAuthorizedAsync(ActionType.Delete, accomodationvenue);
+            DenyIfNotAuthorizedAsync(ActionType.Delete, accomodationvenue);
 
             _es.Delete(accomodationvenue);
             await _es.SaveAsync();

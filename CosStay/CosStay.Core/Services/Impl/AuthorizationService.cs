@@ -56,14 +56,19 @@ namespace CosStay.Core.Services.Impl
             return actionType == ActionType.Read || IsAdmin(user);
         }
 
+        private Dictionary<User, bool> _adminCache = new Dictionary<User, bool>();
         public bool IsAdmin(User user)
         {
-            return (from ur in user.Roles
-                         join r in _es.GetAll<IdentityRole>()
-                         on ur.RoleId equals r.Id
-                         where r.Name == "Admin"
-                              select ur.UserId).Any();
-                         
+            if (_adminCache.ContainsKey(user))
+                return _adminCache[user];
+
+            var isAdmin = _es.GetAll<IdentityRole>()
+                .Where(r => r.Name == "Admin").SelectMany(u => u.Users)
+                .Where(u => u.UserId == user.Id).Count() > 0;
+
+            _adminCache.Add(user, isAdmin);
+
+            return isAdmin;             
         }
     }
 }

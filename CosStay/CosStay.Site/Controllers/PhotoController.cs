@@ -53,19 +53,19 @@ namespace CosStay.Site.Controllers
                 throw new InvalidOperationException("Will not create orphan photo record");
 
             if (locationId.HasValue)
-                await DenyIfNotAuthorizedAsync(ActionType.Update, await _es.GetAsync<Location>(locationId.Value));
+                DenyIfNotAuthorizedAsync(ActionType.Update, await _es.GetAsync<Location>(locationId.Value));
             if (eventId.HasValue)
-                await DenyIfNotAuthorizedAsync(ActionType.Update, await _es.GetAsync<Event>(eventId.Value));
+                DenyIfNotAuthorizedAsync(ActionType.Update, await _es.GetAsync<Event>(eventId.Value));
             if (eventInstanceId.HasValue)
-                await DenyIfNotAuthorizedAsync(ActionType.Update, await _es.GetAsync<EventInstance>(eventInstanceId.Value));
+                DenyIfNotAuthorizedAsync(ActionType.Update, await _es.GetAsync<EventInstance>(eventInstanceId.Value));
             if (venueId.HasValue)
-                await DenyIfNotAuthorizedAsync(ActionType.Update, await _es.GetAsync<Venue>(venueId.Value));
+                DenyIfNotAuthorizedAsync(ActionType.Update, await _es.GetAsync<Venue>(venueId.Value));
             if (bedId.HasValue)
-                await DenyIfNotAuthorizedAsync(ActionType.Update, await _es.GetAsync<Bed>(bedId.Value));
+                DenyIfNotAuthorizedAsync(ActionType.Update, await _es.GetAsync<Bed>(bedId.Value));
             if (accomodationRoomId.HasValue)
-                await DenyIfNotAuthorizedAsync(ActionType.Update, await _es.GetAsync<AccomodationRoom>(accomodationRoomId.Value));
+                DenyIfNotAuthorizedAsync(ActionType.Update, await _es.GetAsync<AccomodationRoom>(accomodationRoomId.Value));
             if (accomodationVenueId.HasValue)
-                await DenyIfNotAuthorizedAsync(ActionType.Update, await _es.GetAsync<AccomodationVenue>(accomodationVenueId.Value));
+                DenyIfNotAuthorizedAsync(ActionType.Update, await _es.GetAsync<AccomodationVenue>(accomodationVenueId.Value));
 
             var photo = new Photo()
             {

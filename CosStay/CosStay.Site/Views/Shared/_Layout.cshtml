@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using StackExchange.Profiling;
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -46,6 +47,8 @@
             <p>&copy; <a href="https://milliamp.org">Development</a> by <a href="http://alextaylor.co.nz">Alex Taylor</a> @DateTime.Now.Year</p>
         </footer>
     </div>
+    @MiniProfiler.RenderIncludes()
+
 
 </body>
 </html>

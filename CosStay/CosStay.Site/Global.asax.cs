@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using StackExchange.Profiling;
+using StackExchange.Profiling.EntityFramework6;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -24,10 +26,16 @@ namespace CosStay.Site
                 ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
             };
 
+            MiniProfilerEF6.Initialize();
         }
 
         protected void Application_BeginRequest(object sender, EventArgs e)
         {
+            if (Request.IsLocal)
+            {
+                MiniProfiler.Start();
+            } 
+
             //You don't want to redirect on posts, or images/css/js
             bool isGet = HttpContext.Current.Request.RequestType.ToLowerInvariant().Contains("get");
             if (isGet && HttpContext.Current.Request.Url.AbsolutePath.Contains('.') == false)
@@ -44,6 +52,11 @@ namespace CosStay.Site
                     Response.End();
                 }
             }
+        }
+
+        protected void Application_EndRequest(object sender, EventArgs e)
+        {
+            MiniProfiler.Stop();
         }
 
         /*protected void Application_Error(object sender, EventArgs e)

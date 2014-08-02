@@ -30,5 +30,22 @@ namespace CosStay.Core.Services.Impl
                 return _user;
             }
         }
+        /*
+        private User _currentUser = null;
+        public async Task<User> GetCurrentUserAsync()
+        {
+            if (!Request.IsAuthenticated)
+            {
+                _currentUser = null;
+                return null;
+            }
+
+            if (_currentUser != null)
+                return _currentUser;
+
+            _currentUser = await _es.GetAsync<User>(Identity.GetUserId());
+            return _currentUser;
+
+        }*/
     }
 }

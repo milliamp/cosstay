@@ -39,7 +39,7 @@ namespace CosStay.Site.Controllers
             }
         }
 
-        public async Task SetSharedViewParameters()
+        public void SetSharedViewParameters()
         {
             try
             {
@@ -58,23 +58,6 @@ namespace CosStay.Site.Controllers
         {
             AsyncInline.Run(async () => await SetSharedViewParameters());
             base.OnActionExecuted(filterContext);
-        }
-
-        private User _currentUser = null;
-        public async Task<User> GetCurrentUserAsync()
-        {
-            if (!Request.IsAuthenticated)
-            {
-                _currentUser = null;
-                return null;
-            }
-                
-            if (_currentUser != null)
-                return _currentUser;
-
-            _currentUser = await _es.GetAsync<User>(Identity.GetUserId());
-                return _currentUser;
-            
         }
 
         protected async Task<T> ValidateDetailsAsync<T>(IEntityStore es, int id, string name) where T : NamedEntity
@@ -96,16 +79,16 @@ namespace CosStay.Site.Controllers
         }
 
 
-        protected async Task DenyIfNotAuthorizedAsync<TEntity>(ActionType actionType) where TEntity : class
+        protected void DenyIfNotAuthorizedAsync<TEntity>(ActionType actionType) where TEntity : class
         {
             
-            if (!_auth.IsAuthorizedTo<TEntity>(await GetCurrentUserAsync(), actionType, default(TEntity)))
+            if (!_auth.IsAuthorizedTo<TEntity>(actionType, default(TEntity)))
                 throw new HttpException(403, "Access Denied");
         }
 
-        protected async Task DenyIfNotAuthorizedAsync<TEntity>(ActionType actionType, TEntity entity) where TEntity : class
+        protected void DenyIfNotAuthorizedAsync<TEntity>(ActionType actionType, TEntity entity) where TEntity : class
         {
-            if (!_auth.IsAuthorizedTo(await GetCurrentUserAsync(), actionType, entity))
+            if (!_auth.IsAuthorizedTo(actionType, entity))
                 throw new HttpException(403, "Access Denied");
         }
 
